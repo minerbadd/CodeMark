@@ -160,19 +160,19 @@ The function takes a `bounds` table for its `start`, an addend, `addend: xyz:` (
 
 CodeMark provides the programs to generate project documentation and LLS library files:
 
-- `apiFiles` generates markdown summaries and the repository (used by ZBS and `signfiles)
+- `apiFiles` generates markdown summaries and the repository (used by ZBS and `signfiles`)
 - `signFiles` generates LLS libraries, one for each source module, from the repository
 - `downFiles` generates HTML from summary files and the source modules themselves for each source module
 
-The `apiFiles` and `downFiles` programs are front ends for `apiMark` and `codedown` respectively. They are used by the `opFiles` program in common to navigate a project directory for batch operations. Support is also provided by `apiMark` as a ZBS plug-in operating on the currently edited file with a symlink in the ZBS `packages` directory. ZBS code completions access the repository file through a symlink in the ZBS `api/lua` directory.
+The `apiFiles` and `downFiles` programs are front ends for `apiMark` and `downMark` respectively. They are both used by the `opFiles` program to navigate a project directory for batch operations. Support is also provided by `apiMark` as a ZBS plug-in operating on the currently edited file with a symlink in the ZBS `packages` directory. ZBS code completions access the repository file through an appropriately named symlink in the ZBS `api/lua` directory.
 
 All the CodeMark operations are invoked by `Mark` in the `CodeMark` directory:
 
 `Mark(apiDirectory, apiFile, sourceDirectories, docsDirectories, codeDirectories, verbose)`
 
-The `apiDirectory` is the path to the directory for the repository and the LLS libraries (as a string). The `apiFile` is the filename string for the repository. The `sourceDirectories` argument is a table of strings, each entry the path to a directory of source modules. The `docsDirectories` and `codeDirectories` arguments are tables of paths (as strings) to stipulate where the code summaries and the code itself as HTML are to be put. The `verbose` argument, a boolean, is `true` for more detail on the progress of `Mark` operations.
+The `apiDirectory` is the path to the directory for the repository and the LLS libraries (as a string). The `apiFile` is the filename (string) for the repository. The `sourceDirectories` argument is a table of strings, each entry the path to a directory of source modules. The `docsDirectories` and `codeDirectories` arguments are tables of paths (as strings) to stipulate where the code summaries and the code itself as HTML are to be put. The `verbose` argument, a boolean, is `true` for more detail on the progress of `Mark` operations.
 
-Set the `LUA_PATH` environment variable for `require` calls to include `%LUA_PROJECTS%\CodeMark\?.lua;;`where `LUA_PROJECTS` is the directory where `CodeMark` can be found. In Windows, there's a GUI, `sysdm.cpl`, for that.
+For windows, set the `LUA_PATH` environment variable for `require` calls to include `%LUA_PROJECTS%\CodeMark\?.lua;; `where `LUA_PROJECTS` is the directory where `CodeMark` can be found. In Windows, there's a GUI, `sysdm.cpl`, for that.
 
 ## Conclusions
 
