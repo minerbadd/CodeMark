@@ -6,7 +6,7 @@ One example of a development environment, and the focus of a particular CodeMark
 
 CodeMark deals with more than function signatures and type definitions. Descriptions of Command Line Interfaces (CLIs) are used to generate simple text help files. CLI descriptions can be documented in their implementations and copied to where they're used.
 
-CodeMark has been used in a modestly sized project, MUSE, as a test of its utility. That project batches calls on the ZBS, VSC, and summary generators to provide all the documentation for the project as a whole. As mentioned, this includes help file generation. It also provides for documentation of the auxilliary files generally found as part of a project.
+CodeMark has been used in a modestly sized project, <a href="https://minerbadd.github.io/MUSE/data/muse/MiningMUSE.html" target="_blank"> MUSE</a>, as a test of its utility. That project batches calls on the ZBS, VSC, and summary generators to provide all the documentation for the project as a whole. As mentioned, this includes help file generation. It also provides for documentation of the auxilliary files generally found as part of a project.
 
 What follows is a description of the CodeMark annotations. There are two elements of the CodeMark system: _mark_ and _reference_ annotations. First up are the mark annotations.
 
