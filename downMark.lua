@@ -56,7 +56,6 @@ local matches = {
   {"%*(.-)%*", "<i>%1</i>"}, --alternate italics
   {"@@", "_"}, -- restoration
   {"`(.-)`", "<code>%1</code>"}, -- code
-  {'%[(.-)%]%((.-)%)', '<a href="%2">%1</a>'}, -- link
 }
 
 local function lineHTML (inLine)  
