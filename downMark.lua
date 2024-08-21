@@ -21,7 +21,7 @@ local markdownHeader = [[
 <!DOCTYPE html> 
   <html> 
     <head> 
-      <link href="../../assets/museMD.css" rel="stylesheet" /> 
+      <link href="../../assets/muse.css" rel="stylesheet" /> 
     </head> 
   <body> 
     <pre>
