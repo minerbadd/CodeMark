@@ -5,27 +5,19 @@ local downMark = {}
 require("lfs"); local lfs = _G.lfs -- to surpress lint warnings
 
 -- Constants first, keep code tight
+local function luaHeader(assets)
+local luaHeaderFirst = '<!DOCTYPE html> \n <html> \n <head> \n'
+local prismCSS = '<link href="'..assets..'prism.css" rel=stylesheet"/>\n'
+local museCSS = '<link href="'..assets..'muse.css" rel=stylesheet"/>\n </head>\n'
+local luaHeaderLast = '</head>\n<body>\n<script src="'..assets..'/prism.js"></script> \n'
+return luaHeaderFirst..prismCSS..museCSS..luaHeaderLast
+end
 
-local luaHeader = [[
-<!DOCTYPE html> 
-  <html> 
-  <head> 
-  <link href="../../assets/prism.css" rel="stylesheet" /> 
-  <link href="../../assets/muse.css" rel="stylesheet" /> 
-  </head> 
-  <body> 
-     <script src="../../assets/prism.js"></script> 
-]]
-
-local markdownHeader = [[
-<!DOCTYPE html> 
-  <html> 
-    <head> 
-      <link href="../../assets/muse.css" rel="stylesheet" /> 
-    </head> 
-  <body> 
-    <pre>
-]]
+local function markdownHeader(assets) 
+local markdownHeaderFirst = '<!DOCTYPE html> \n <html> \n <head> \n'
+local markdownCSS = '<link href="'..assets..'muse.css" rel=stylesheet"/>\n </head>\n'
+local markdownHeaderLast = '</head> \n <body>\n <pre>'
+end
 
 local luaFooter = [[
   </body> 
@@ -38,7 +30,9 @@ local markdownFooter = [[
 </html>
 ]]
 
-local header = {lua = luaHeader, md = markdownHeader}
+local function header(assets) 
+  return {lua = luaHeader(assets), md = markdownHeader(assets)} 
+end
 local footer = {lua = luaFooter, md = markdownFooter}
 
 local hashBase = 3 -- maximum <h..> .. </h..>
@@ -126,11 +120,11 @@ local function makeOut(outName)
   return realized..outStub..".html" -- replace fileName extension with `html`
 end
 
-function downMark.cli (inPath, outPath, extension, verbose)
+function downMark.cli (inPath, outPath, extension, assets, verbose)
   local outHTML = makeOut(outPath) -- `outName` needs a realized directory and a proper (HTML) extension
   local fileIn, fileOut = assert(io.open(inPath, "r")), assert(io.open(outHTML, "w"))
   local outLines, inLines = {}, fileIn:read("*all"); fileIn:close()
-  for line in header[extension]:gmatch("([^\n]*)\n?") do outLines[#outLines + 1] = line end
+  for line in header(assets)[extension]:gmatch("([^\n]*)\n?") do outLines[#outLines + 1] = line end
   inScript = extension == "md"; putHTML(inLines, outLines)-- put HTML lines in table
   for line in footer[extension]:gmatch("([^\n]*)\n?") do outLines[#outLines + 1] = line end
   writeLines(outLines, fileOut, outHTML, verbose); fileOut:flush(); fileOut:close()
