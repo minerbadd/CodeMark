@@ -4,7 +4,7 @@
 
 local apiFiles, signFiles, downFiles = require("apiFiles"), require("signFiles"), require("downFiles")
 
-local function Mark(apiDirectory, apiFile, sourceDirectories, docsDirectories, codeDirectories, verbose)
+local function Mark(apiDirectory, apiFile, sourceDirectories, docsDirectories, codeDirectories, assets, verbose)
 
 -- `opFiles` applies `operation` on files matching an `extension` in `directory` derived from `MUSE`
 -- as `opfiles(operation, directory, extension, outDirectory)` 
@@ -25,11 +25,11 @@ local function Mark(apiDirectory, apiFile, sourceDirectories, docsDirectories, c
   signFiles.cli(apiDirectory, apiFile, verbose)
   
   for _, directory in ipairs(docsDirectories) do
-    downFiles(directory, directory, "md", verbose)
+    downFiles(directory, directory, "md", assets, verbose)
   end
 
   for index, sourceDirectory in ipairs(sourceDirectories) do
-    downFiles(sourceDirectory, codeDirectories[index], "lua", verbose)
+    downFiles(sourceDirectory, codeDirectories[index], "lua", assets, verbose)
   end
 end
 

@@ -4,45 +4,8 @@ local downMark = {}
 ---@diagnostic disable-next-line: undefined-field
 require("lfs"); local lfs = _G.lfs -- to surpress lint warnings
 
--- Constants first, keep code tight
-
-local luaHeader = [[
-<!DOCTYPE html> 
-  <html> 
-  <head> 
-  <link href="../../assets/prism.css" rel="stylesheet" /> 
-  <link href="../../assets/muse.css" rel="stylesheet" /> 
-  </head> 
-  <body> 
-     <script src="../../assets/prism.js"></script> 
-]]
-
-local markdownHeader = [[
-<!DOCTYPE html> 
-  <html> 
-    <head> 
-      <link href="../../assets/muse.css" rel="stylesheet" /> 
-    </head> 
-  <body> 
-    <pre>
-]]
-
-local luaFooter = [[
-  </body> 
-</html>
-]]
-
-local markdownFooter = [[
-    </pre>
-  </body> 
-</html>
-]]
-
-local header = {lua = luaHeader, md = markdownHeader}
-local footer = {lua = luaFooter, md = markdownFooter}
-
 local hashBase = 3 -- maximum <h..> .. </h..>
-local inScript = false
+local inScript = false -- current context
 
 local matches = {
   {"%*%*(.-)%*%*", "<b>%1</b>"}, -- bold
@@ -126,7 +89,8 @@ local function makeOut(outName)
   return realized..outStub..".html" -- replace fileName extension with `html`
 end
 
-function downMark.cli (inPath, outPath, extension, verbose)
+function downMark.cli (inPath, outPath, extension, assets, verbose)
+  local header, footer = table.unpack(assets)
   local outHTML = makeOut(outPath) -- `outName` needs a realized directory and a proper (HTML) extension
   local fileIn, fileOut = assert(io.open(inPath, "r")), assert(io.open(outHTML, "w"))
   local outLines, inLines = {}, fileIn:read("*all"); fileIn:close()
