@@ -5,6 +5,29 @@ local downMark = {}
 require("lfs"); local lfs = _G.lfs -- to surpress lint warnings
 
 -- Constants first, keep code tight
+
+
+local luaHeader = [[
+<!DOCTYPE html> 
+  <html> 
+  <head> 
+  <link href="../../assets/prism.css" rel="stylesheet" /> 
+  <link href="../../assets/muse.css" rel="stylesheet" /> 
+  </head> 
+  <body> 
+     <script src="../../assets/prism.js"></script> 
+]]
+
+local markdownHeader = [[
+<!DOCTYPE html> 
+  <html> 
+    <head> 
+      <link href="../../assets/muse.css" rel="stylesheet" /> 
+    </head> 
+  <body> 
+    <pre>
+]]
+
 local function luaHeader(assets)
 local luaHeaderFirst = '<!DOCTYPE html> \n <html> \n <head> \n'
 local prismCSS = '<link href="'..assets..'prism.css" rel=stylesheet"/>\n'
