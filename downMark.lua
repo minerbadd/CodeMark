@@ -89,8 +89,8 @@ local function makeOut(outName)
   return realized..outStub..".html" -- replace fileName extension with `html`
 end
 
-function downMark.cli (inPath, outPath, extension, assets, verbose)
-  local header, footer = table.unpack(assets)
+function downMark.cli (inPath, outPath, extension, html, verbose)
+  local header, footer = table.unpack(html)
   local outHTML = makeOut(outPath) -- `outName` needs a realized directory and a proper (HTML) extension
   local fileIn, fileOut = assert(io.open(inPath, "r")), assert(io.open(outHTML, "w"))
   local outLines, inLines = {}, fileIn:read("*all"); fileIn:close()
