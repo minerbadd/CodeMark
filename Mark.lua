@@ -1,7 +1,6 @@
 --[[
 ## -- Produce LLS Signature Files, Zerobrane API, Markdown and HTML Documentation
 --]]
-
 local apiFiles, signFiles, downFiles = require("apiFiles"), require("signFiles"), require("downFiles")
 
 local function Mark(apiDirectory, apiFile, sourceDirectories, docsDirectories, codeDirectories, html, verbose)
