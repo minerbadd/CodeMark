@@ -89,14 +89,36 @@ local function makeOut(outName)
   return realized..outStub..".html" -- replace fileName extension with `html`
 end
 
-function downMark.cli (inPath, outPath, extension, html, verbose)
-  local header, footer = table.unpack(html)
+local assets = assert(os.getenv("CODEMARK_ASSETS"), "CODEMARK_ASSETS enviroment variable not found").."/" 
+local prismCSS, prismJS, downmarkCSS = assets.."prism.css", assets.."prism.js", assets.."downmark.css"
+local downMarkLink = '<link href="'..downmarkCSS..'" rel="stylesheet" />\n'
+local prismLink = '<link href="'..prismCSS..'" rel="stylesheet" />\n'
+local prismScript = '<script src="'..prismJS..'"></script>\n'
+local doctype = "<!DOCTYPE html>\n <html>\n<head>\n"
+local luaHeader = doctype..prismLink..downMarkLink.."</head>\n<body>\n"..prismScript
+local markdownHeader = doctype..downMarkLink.."</head>\n<body>\n<pre>\n"
+
+local luaFooter = [[
+  </body> 
+</html>
+]]
+
+local markdownFooter = [[
+    </pre>
+  </body> 
+</html>
+]]
+
+local headers = {lua = luaHeader, md = markdownHeader}
+local footers = {lua = luaFooter, md = markdownFooter}
+
+function downMark.cli (inPath, outPath, extension, verbose)
   local outHTML = makeOut(outPath) -- `outName` needs a realized directory and a proper (HTML) extension
   local fileIn, fileOut = assert(io.open(inPath, "r")), assert(io.open(outHTML, "w"))
   local outLines, inLines = {}, fileIn:read("*all"); fileIn:close()
-  for line in header[extension]:gmatch("([^\n]*)\n?") do outLines[#outLines + 1] = line end
+  for line in headers[extension]:gmatch("([^\n]*)\n?") do outLines[#outLines + 1] = line end
   inScript = extension == "md"; putHTML(inLines, outLines)-- put HTML lines in table
-  for line in footer[extension]:gmatch("([^\n]*)\n?") do outLines[#outLines + 1] = line end
+  for line in footers[extension]:gmatch("([^\n]*)\n?") do outLines[#outLines + 1] = line end
   writeLines(outLines, fileOut, outHTML, verbose); fileOut:flush(); fileOut:close()
 end
 

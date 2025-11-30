@@ -1,0 +1,23 @@
+/* MUSE code css */
+
+body {
+    font-family: Segoe, 'Segoe UI', Candara, Calibri, Arial, sans-serif;
+    margin-left: 4%; margin-right: 4%; line-height: 1.5; font-size: 15px;
+    font-weight: 400
+}
+
+pre[class*="language-"]:before,
+pre[class*="language-"]:after,
+pre[class*="language-"] > code {
+    font-size: 15px;
+    padding: 0px 0em 0.7em 1em;
+	margin: 1em 0em 0.7em 0em;
+    border-left: 0px solid #eff4f7;
+	box-shadow: -1px 0px 0px 0px #eff1f3, 0px 0px 0px 1px #dfdfdf;
+    background-color: aliceblue;
+}
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background-color: aliceblue;
+}
+

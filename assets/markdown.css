@@ -1,14 +1,14 @@
-/* MUSE MD css */
+/* MiningMuse MD css */
 
 body {
 font-family: Segoe, 'Segoe UI', Candara, Calibri, Arial, sans-serif;
-margin-left: 10%; margin-right: 10%; line-height: 1.5; font-size: 16px;
+margin-left: 4%; margin-right: 4%; line-height: 1.5; font-size: 15px;
 font-weight: 400
 }
 code {
     color: #0f8928; /* base00 */
 	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-	font-size: 16px;
+	font-size: 15px;
 	text-align: left;
 }
 

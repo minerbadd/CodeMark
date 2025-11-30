@@ -7,9 +7,9 @@
 -- _The default project name is the name of the directory containing the directory of the summary files_.
 -- _API definitions are replaced but not erased. They can be erased by deleting and rebuilding the project API file._
 
----@diagnostic disable-next-line: undefined-field
+---@diagnostic disable-next-line: undefined-field$
 require("lfs"); local lfs = _G.lfs -- to surpress lint warnings
---local downMark = require("downMark").cli
+local downMark = require("downMark").cli
 
 -- **Some extractions to get the critical parts of text and ignore the rest**
 
@@ -321,8 +321,8 @@ local marker = function() -- not used by markFiles
 ---@diagnostic disable-next-line: undefined-global
   local fileEdited = ide:GetDocument(ed):GetFilePath()
   local marked, Checkings, lines, outPath, HelpPath, apiPath = pcall(codemarkCLI, fileEdited, ZBSroot)
-  --local inPath, extension, html, verbose = fileEdited, "md", , true -- TODO
-  --downMark(inPath, outPath, extension, html, verbose)
+  local inPath, extension, verbose = fileEdited, "md", true 
+  downMark(inPath, outPath, extension, verbose)
   if not marked then ide:Print("CodeMark File?: "..lines.." for "..fileEdited) end
   for _, checking in ipairs(Checkings) do ide:Print(checking) end
   if apiPath then ide:Print("Updating "..apiPath) end
