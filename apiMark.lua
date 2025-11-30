@@ -322,8 +322,8 @@ local marker = function() -- not used by markFiles
   local fileEdited = ide:GetDocument(ed):GetFilePath()
   local marked, Checkings, lines, outPath, HelpPath, apiPath = pcall(codemarkCLI, fileEdited, ZBSroot)
   local inPath, extension, verbose = fileEdited, "md", true 
+  if not marked then ide:Print("CodeMark File? for "..fileEdited); return end
   downMark(inPath, outPath, extension, verbose)
-  if not marked then ide:Print("CodeMark File?: "..lines.." for "..fileEdited) end
   for _, checking in ipairs(Checkings) do ide:Print(checking) end
   if apiPath then ide:Print("Updating "..apiPath) end
   if outPath then ide:Print(lines.." lines output to "..outPath) end
