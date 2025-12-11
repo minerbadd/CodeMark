@@ -15,10 +15,10 @@ local function Mark(apiDirectory, apiFile, sourceDirectories, docsDirectories, c
   os.remove(apiDirectory..apiFile)-- for fresh start project repository
 
   for _, sourceDirectory in ipairs(sourceDirectories) do 
-    pcall(apiFiles, sourceDirectory, apiDirectory, apiFile, verbose)
+    pcall(apiFiles, sourceDirectory, apiDirectory, apiFile, verbose) -- ignore unmarked files
   end -- two passes to resolve copies
   for _, sourceDirectory in ipairs(sourceDirectories) do 
-    pcall(apiFiles, sourceDirectory, apiDirectory, apiFile, verbose)
+    pcall(apiFiles, sourceDirectory, apiDirectory, apiFile, verbose) -- ignore unmarked files
   end
 
   signFiles.cli(apiDirectory, apiFile, verbose)
