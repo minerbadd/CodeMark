@@ -15,12 +15,10 @@ local function marker(apiDirectory, apiFile, sourceDirectories, docsDirectories,
   os.remove(apiDirectory..apiFile)-- for fresh start project repository
 
   for _, sourceDirectory in ipairs(sourceDirectories) do -- make apifile project repository
-    local OK, message = pcall(apiFiles, sourceDirectory, apiDirectory, apiFile, verbose) 
-    if not OK then print("ERROR "..message) end
+    apiFiles(sourceDirectory, apiDirectory, apiFile, verbose) 
   end
   for _, sourceDirectory in ipairs(sourceDirectories) do -- two passes to resolve CodeMark copy entries
-    local OK, message = pcall(apiFiles, sourceDirectory, apiDirectory, apiFile, verbose)
-    if not OK then print("ERROR "..message) end
+    apiFiles(sourceDirectory, apiDirectory, apiFile, verbose)
   end; print("API Repository in "..apiDirectory..apiFile)
 
   signFiles.cli(apiDirectory, apiFile, verbose) -- make sign files for Lua Language Server from project repository apifile 

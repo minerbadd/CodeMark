@@ -13,7 +13,8 @@ local function opFiles(op, inDirectory, extension, outDirectory)
   for inName in lfs.dir(inDirectory) do
     local inPath = checkFile(inName, inDirectory, extension); if inPath then
       local outPath = outDirectory and outDirectory..inName
-      op(inPath, outPath, extension)  
+      local ok, message = pcall(op, inPath, outPath, extension)
+      if not ok then print("ERROR "..message.." -> "..outPath) end
     end
   end
 end
