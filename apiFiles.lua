@@ -1,4 +1,4 @@
--- **CLI for apiMark**...puts api file in specified apiDirectory
+-- **CLI for apiMark**...puts prject repository api file in specified apiDirectory
 
 local opFiles, apiMark = require("opFiles"), require("apiMark").cli
 

@@ -152,7 +152,7 @@ local function markLine(this, inputPath)
     if not kind then error("codemark.markline: Unrecognized "..mark.." for kind in "..this.." for "..inputPath, 0) end
     local sign, text, out = string.match(rest, splits[kind]); text = text or "" -- and split it accordingly
     if comments[kind] then text = sign or ""; sign = sign or "" end -- **special handling**: text from sign
-    if not sign then error("Missing sign in marked comment "..this.." for "..inputPath) end
+    if not sign then error("Missing sign in marking "..this.." for "..inputPath) end
     local thisLine, thisSign, thisText = this, sign.." ", stripFormat(text)
     return {kind = kind, line = thisLine, sign = thisSign, text = thisText, out = out} 
   end; 
@@ -311,8 +311,10 @@ local function codemarkCLI(input, ZBSroot, apiPath) -- ZBSroot if called from ZB
   local outLines, helpLines = doLines(marked); -- **do the work**
   local handleZ = assert(io.open(apiPath or ZBSapiPath, "w")); serialize(ZBSapi, handleZ); assert(io.close(handleZ))
   local handleO = assert(io.open(outPath, "w")); output(outLines, handleO); handleO:flush(); assert(io.close(handleO))
-  if HelpPath then local handleH = assert(io.open(HelpPath, "w")); output(helpLines, handleH); assert(io.close(handleH)) end
-  return Checkings, #outLines, outPath, HelpPath, ZBSapiPath or apiPath
+  if HelpPath then 
+    local handleH = assert(io.open(HelpPath, "w")); 
+    output(helpLines, handleH); assert(io.close(handleH)) 
+  end; return Checkings, #outLines, outPath, HelpPath, ZBSapiPath or apiPath
 end
 
 local marker = function() -- not used by markFiles
