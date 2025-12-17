@@ -120,21 +120,20 @@ There are ten of these sharing the common definition and generating type informa
 
 ## Type Annotations: Tables and Subtypes of Tables
 
-Tables are a critical building block for Lua scripts. A Lua table can be an _array_, a _tuple_, a _dictionary_, or what LLS calls _table literals_. (The last are accessed using the dot notation as seen in the function names above.) Each has its own annotation. A table can also be typed as just a table with no other information as `{:}`.  Here's an example of a TYPE annotation describing an array of strings:
+Tables are a critical building block for Lua scripts. A Lua table can be an _array_, a _dictionary_, or what LLS calls _table literals_. (The last are accessed using the dot notation as seen in the function names above.) Each has its own annotation. A table can also be typed as just a table with no other information as `{:}`.  But there's more. Here's an example of a TYPE annotation describing an array of strings:
 
 `--:> plan.path:` _array of space separated character sequence strings describing path_ -> `":"[]`
 
-CodeMark provides for naming parts of tuple and dictionaries. This information is stripped away for LLS:
+CodeMark provides for naming the key of a dictionary and the literals of table literals. This information is stripped away for LLS:
 
-`--:> xyz:` _Minecraft coordinates: +x: east, +y: up, +z: south_ -> `:[x: #:, y: #:, z: #:]`
+`--:> features:` _Dictionary of string key feature, any value pairs_ -> `[feature: ":"]: any`
 
-`--:> features:` _Dictionary of string key, any value pairs_ -> `[key: ":"]: any`
-
+`--:> xyz:` _Minecraft coordinates: +x: east, +y: up, +z: south_ -> `[x: #:, y: #:, z: #:]`
 
  Specific kinds of tables can be thought of as being a new type which is a subtype of tables as in the examples above. Here's another example. The following function has one argument, `targets`, an array of strings. It returns a `detail` or `nil`. A `detail` is a table accessed by table literals: `name`, `count`, and `damage`. Each of these is typed and described.
 
 `--:: core.findItems(targets: ":"[])` -> _Selects found slot._ -> `detail?`  
-`--:> detail:` _Defined by Computercraft_ -> `{name: detail.name, count: detail.count, damage: detail.damage}`  
+`--:> detail:` _Defined by Computercraft_ -> `[name: detail.name, count: detail.count, damage: detail.damage]`  
 `--:> detail.name:` _Prepended by the mod name `"minecraft:"`._ -> `":"`  
 `--:> detail.count:` _Available in inventory_ -> `#:` 
 `--:> detail.damage:` _Distinguishing value_ -> `#:` 
@@ -152,9 +151,9 @@ As promised, types (and return values of functions) can be unions. Here's one th
 Type declarations may, of course, be build up from other declared types:
 
 `--:: core.vectorPairs(start: bounds, addend: xyz, number: #:, partial: bounds?)` -> _Make plots._ -> `bounds[]`  
-`--:> bounds:` _Vector pair defining a rectangular solid_ -> `:[xyz, xyz]`
+`--:> bounds:` _Vector pair defining a rectangular solid_ -> `[xyz, xyz]`
 
-The function takes a `bounds` table for its `start`, an addend, `addend: xyz:` (which, as indicated, is an `xyz` table), a `number`, `#:`, and an additional optional `bounds` table. It returns an array of `bounds`.
+The function takes a `bounds` table for its `start`, an addend, `addend: xyz` (which, as indicated, is an `xyz` table), a `number`, `#:`, and an additional optional `bounds` table. It returns an array of `bounds`.
 
 ## Making Marks
 

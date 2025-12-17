@@ -26,7 +26,7 @@ end
 -- **Partition Text Keeping Containers Whole**
 
 local containers = { 
-  -- (leaky)funContainer,   groupContainer,     (leaky)dictionary,      tupleContainer,   tableContainer
+  -- (leaky)funContainer,   groupContainer,     (leaky)dictionary,      literalsContainer,   tableContainer
   {"%b():", "%(.-%):.-$"}, {"%b()", "%b()"}, {"%b[]:", "%[.-%]:.-$"}, {":%b[]", ":%b[]"}, {"%b{}", "%b{}"}, 
 }
 local function partition(pattern) -- iterator factory
@@ -96,7 +96,7 @@ local function typeToken(text) return text end
 
 -- **Containers and Array Element Handlers: Make entries of elements which may be or may be in containers.**
 
-local makeEntry, union, array, dictionary, groupContainer, tableContainer, funContainer, tupleContainer -- mutual recursions
+local makeEntry, union, array, dictionary, groupContainer, tableContainer, funContainer, literalsContainer -- mutual recursions
 
 function union(text, line)
   local beforeText, afterText = string.match(text, "(.-)|(.*)")
@@ -112,7 +112,7 @@ function array(text, line) -- not a tuple, just the [] marker is enough
 end
 
 local function tag(text, pattern)
-  local patternStart = assert(string.find(text, pattern))
+  local patternStart = assert(string.find(text, pattern), "missing pattern "..pattern.." in "..text)
   local beforePart = string.sub(text, 1, patternStart - 1)
   local beforeText = string.match(beforePart, "(.-):")
   if not beforeText then return "" end
@@ -135,7 +135,7 @@ function groupContainer(text, line)
   return tag(text, "%b()").."("..groupEntry..")"..optional(text)
 end
 
-function tableContainer(text, line)
+function tableContainer(text, line) -- TODO drop
   local insideTable = string.match(text, "{(.-)}%s*$")
   local tableEntry = makeEntry(insideTable, line)
   return tag(text, "%b{}").."{"..tableEntry.."}"..optional(text) 
@@ -150,25 +150,25 @@ function funContainer(text, line) -- leaky returns, use group to contain funCont
   return funEntry
 end
 
-function tupleContainer(text, line) 
-  local insideTuple = string.match(text, "%[(.-)%]%s*$")
-  local _, taggedParts = makeEntry(insideTuple, line)
-  local tupleParts = {}; for _, tuplePart in ipairs(taggedParts) do
-    tupleParts[#tupleParts + 1] = stripSpaces(stripTag(tuplePart))
+function literalsContainer(text, line) 
+  local insideLiterals = string.match(text, "%[(.-)%]%s*$")
+  local _, taggedParts = makeEntry(insideLiterals, line)
+  local literalsParts = {}; for _, literalsPart in ipairs(taggedParts) do
+    literalsParts[#literalsParts + 1] = stripSpaces(stripTag(literalsPart))
   end; 
-  local tupleEntry = "["..table.concat(tupleParts, ", ").."]"..optional(text) 
-  return tag(text, ":%b[]")..tupleEntry -- e.g. "[string, xyz]"
+  local literalsEntry = "["..table.concat(literalsParts, ", ").."]"..optional(text) 
+  return tag(text, "%b[]")..literalsEntry -- e.g. "[string, xyz]"
 end
 
 local finders = { -- **Ordered most carefully; matchID string for debug**
 
   {"({:})", tableToken,  "tableToken"}, {"(%(:%))", functionToken, "functionToken"}, 
-
-  {"%b():.-$", funContainer, "funContainer"}, {"%b{}", tableContainer, "tableContainer"}, 
-  {"[^%^#@_]:%b[]", tupleContainer, "tupleContainer"}, {".-%[%]", array, "array"},
-  {"%b[]:", dictionary, "dictionary"}, {"%b()", groupContainer, "groupContainer"}, 
-
+  
   {"|", union, "union"},
+
+  {"%b():.-$", funContainer, "funContainer"},  {"%b[]:", dictionary, "dictionary"}, 
+  {".-%[%]", array, "array"}, {"[^%^#@_]%b[]", literalsContainer, "literalsContainer"}, 
+  {"%b[]:", dictionary, "dictionary"}, {"%b()", groupContainer, "groupContainer"}, 
 
   {"(#:)", numberToken, "numberToken"},   {'(":")', stringToken, "stringToken"}, 
   {"(%^:)", booleanToken, "booleanToken"}, {"(@:)", userdataToken, "userdataToken"}, 
@@ -200,7 +200,8 @@ local function elements(text) -- iterator
 end
 
 function makeEntry(text, line) -- containers have elements (which may themselves be containers).
-  if not text then error("signfiles.makeEntry: Can't parse "..line) end
+  if not text then 
+    error("signfiles.makeEntry: Can't parse "..line) end
   local entries = {}; for element, handler in elements(text) do
     local LLS = handler(element, line); entries[#entries + 1] = LLS 
   end;  -- new table for each recursion
