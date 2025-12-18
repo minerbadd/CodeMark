@@ -135,10 +135,10 @@ function groupContainer(text, line)
   return tag(text, "%b()").."("..groupEntry..")"..optional(text)
 end
 
-function tableContainer(text, line) -- TODO drop
-  local insideTable = string.match(text, "{(.-)}%s*$")
+function tupleContainer(text, line) 
+  local insideTable = string.match(text, "[(.-)]%s*$")
   local tableEntry = makeEntry(insideTable, line)
-  return tag(text, "%b{}").."{"..tableEntry.."}"..optional(text) 
+  return tag(text, "%b[]").."{"..tableEntry.."}"..optional(text) 
 end
 
 function funContainer(text, line) -- leaky returns, use group to contain funContainer
@@ -151,13 +151,13 @@ function funContainer(text, line) -- leaky returns, use group to contain funCont
 end
 
 function literalsContainer(text, line) 
-  local insideLiterals = string.match(text, "%[(.-)%]%s*$")
+  local insideLiterals = string.match(text, "{(.-)}%s*$")
   local _, taggedParts = makeEntry(insideLiterals, line)
   local literalsParts = {}; for _, literalsPart in ipairs(taggedParts) do
     literalsParts[#literalsParts + 1] = stripSpaces(stripTag(literalsPart))
   end; 
-  local literalsEntry = "["..table.concat(literalsParts, ", ").."]"..optional(text) 
-  return tag(text, "%b[]")..literalsEntry -- e.g. "[string, xyz]"
+  local literalsEntry = "{"..table.concat(literalsParts, ", ").."}"..optional(text) 
+  return tag(text, "%b{}")..literalsEntry -- e.g. "{string, xyz}"
 end
 
 local finders = { -- **Ordered most carefully; matchID string for debug**
@@ -167,8 +167,9 @@ local finders = { -- **Ordered most carefully; matchID string for debug**
   {"|", union, "union"},
 
   {"%b():.-$", funContainer, "funContainer"},  {"%b[]:", dictionary, "dictionary"}, 
-  {".-%[%]", array, "array"}, {"[^%^#@_]%b[]", literalsContainer, "literalsContainer"}, 
+  {".-%[%]", array, "array"}, {"[^%^#@_]%b{}", literalsContainer, "literalsContainer"}, 
   {"%b[]:", dictionary, "dictionary"}, {"%b()", groupContainer, "groupContainer"}, 
+  {"%b[]", tupleContainer, "tupleContainer"},
 
   {"(#:)", numberToken, "numberToken"},   {'(":")', stringToken, "stringToken"}, 
   {"(%^:)", booleanToken, "booleanToken"}, {"(@:)", userdataToken, "userdataToken"}, 

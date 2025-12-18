@@ -120,13 +120,21 @@ There are ten of these sharing the common definition and generating type informa
 
 ## Type Annotations: Tables and Subtypes of Tables
 
-Tables are a critical building block for Lua scripts. A Lua table can be an _array_, a _dictionary_, or what LLS calls _table literals_. (The last are accessed using the dot notation as seen in the function names above.) Each has its own annotation. A table can also be typed as just a table with no other information as `{:}`.  But there's more. Here's an example of a TYPE annotation describing an array of strings:
+Tables are a critical building block for Lua scripts. A Lua table can be an _array_, a _dictionary_, or what LLS calls _table literals_. (The last are accessed using the dot notation as seen in the function names above.) Each has its own annotation. A table can also be typed as just a table with no other information as `{:}`.  But there's more. 
+
+Tables as dictionaries and what LLS calls table literals are annotated as follows:
+
+`--:> features:` _Dictionary of string key feature, any value pairs_ -> `[feature: ":"]: any`
+
+`--:> position:` _Computercraft co-ordinates (+x east, +y up, +z south)_ -> `{x: #:, y: #:, z: #:}`
+
+CodeMark provides for the labeling of dictionary keys. These are stripped away for LLS.
+
+Lua tables can also be used as (implicityly indexed) arrays. Here's an example of a TYPE annotation describing an array of strings:
 
 `--:> plan.path:` _array of space separated character sequence strings describing path_ -> `":"[]`
 
-CodeMark provides for naming the key of a dictionary and the literals of table literals. This information is stripped away for LLS:
-
-`--:> features:` _Dictionary of string key feature, any value pairs_ -> `[feature: ":"]: any`
+Arrays with a fixed number of elements we'll call _tuples_. As for dictionary keys, CodeMark provides for labeling of tuple elements (stripped away for LLS):
 
 `--:> xyz:` _Minecraft coordinates: +x: east, +y: up, +z: south_ -> `[x: #:, y: #:, z: #:]`
 
@@ -151,7 +159,10 @@ As promised, types (and return values of functions) can be unions. Here's one th
 Type declarations may, of course, be build up from other declared types:
 
 `--:: core.vectorPairs(start: bounds, addend: xyz, number: #:, partial: bounds?)` -> _Make plots._ -> `bounds[]`  
-`--:> bounds:` _Vector pair defining a rectangular solid_ -> `[xyz, xyz]`
+
+`--:> bounds:` _Vector pair, a tuple, defining a rectangular solid_ -> `[xyz, xyz]`
+
+_(Making use of LLS support for tuples.)_
 
 The function takes a `bounds` table for its `start`, an addend, `addend: xyz` (which, as indicated, is an `xyz` table), a `number`, `#:`, and an additional optional `bounds` table. It returns an array of `bounds`.
 

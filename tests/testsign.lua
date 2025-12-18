@@ -14,6 +14,13 @@ local signfiles = dofile(CodeMark.."signfiles.lua")
 local testData = {
   
   {
+    ["type"] = "value",
+    ["returns"] = " `[xyz, xyz]`",
+    ["name"] = "bounds",
+    ["description"] = "Vector pair (not table literals) defining a rectangular solid",
+  },
+  
+  {
   ["returns"] = " \":\" &!` <-",
   ["args"] = "arguments: _task.puts, op: (:), clear: ^:, fill: \":\"?, targets: \":\"[]?",
   ["type"] = "function",
@@ -33,13 +40,6 @@ local testData = {
     ["returns"] = " `[key: \":\"]: any`",
     ["name"] = "features",
     ["description"] = "Dictionary of string key, any value pairs",
-  },
-
-  {
-    ["type"] = "value",
-    ["returns"] = " `[xyz, xyz]`",
-    ["name"] = "bounds",
-    ["description"] = "Vector pair (not table literals) defining a rectangular solid",
   },
   {
     ["returns"] = " `^:, \":\", #: &:` <-",
