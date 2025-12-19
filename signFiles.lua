@@ -12,29 +12,13 @@ local function stripOther(text, index)
   return stripOther(stripped, index + 1)
 end
 
---local function stripTag(text) return string.gsub(text, "[_%w]-:(.+)$", "%1") end
-
 --local function stripSpaces(text) return string.gsub(text, "%s*(%w-)%s*", "%1") end
 
 local function stripNewLine(text) return string.gsub(text, "\n(.+)", "%1") end
---[[
-local function optional(text) -- reduce multiple "?" to just one TODO: redundant?
-  local question = string.match(text, "{.-}([%?]*)") 
-  return (question and question ~= "") and  "?" or ""
-end
---]]
+
 -- **Partition Text Keeping Containers Whole** (by hiding commas)
 
 local containers = {"%b()", "%b[]", "%b{}",}
---[[
-{
-  -- {"%b():", "%(.-%):.-$"}, -- function
-  {"%b()", "%b()"}, -- group and function
-  -- {"%b[]:", "%[.-%]:.-$"}, -- dictionary
-  {"%b[]", "%b[]"}, -- tuple, array, and dictionary
-  {"%b{}", "%b{}"},  -- table including literals
-}
---]]
 
 local function replace(patterns) -- generate function to replace patterns for gsub
   local function replacing(text, index)
@@ -45,15 +29,7 @@ local function replace(patterns) -- generate function to replace patterns for gs
 end
 
 local function hider(text) return replace({ {",", ";"} })(text, 1) end -- specialize replacer
---[[
-local function hide(text) -- commas to semicolons inside container 
-  for _, container in ipairs(containers) do
-    local finder, target = table.unpack(container)
-    local found = string.find(text, finder)
-    if found then return string.gsub(text, target, hider) end -- apply hider to targets in text
-  end; return text -- not a container: no need for hiding commas
-end
---]]
+
 local function hide(text) -- commas to semicolons inside container 
   for _, target in ipairs(containers) do
     local found = string.find(text, target)
@@ -82,6 +58,12 @@ local function restore(text) -- make table of restored parts (no partition of co
   end; return parts
 end
 
+local function stripTag(text) 
+  local parts, stripped  = restore(text), {}
+  for _, part in ipairs(parts) do stripped[#stripped + 1] = string.match(part, "[_%w]-:(.+)") end
+  return table.concat(stripped, ", ")
+end
+
 -- **Handlers to Replace Tokens in Elements with LLS Words.**
 
 local function tableToken(text) return string.gsub(text, "{:}", "table") end
@@ -104,15 +86,9 @@ local function numberToken(text) return string.gsub(text, "#:", "number") end
 
 local function typeTwiceToken(text) return string.gsub(text, ":([_%a%d]-):", "%1: %1") end
 
-local function typeTaggedToken(text) 
-  print(text); 
-  return text 
-end -- TODO drop?
+local function typeTaggedToken(text) return text end 
 
-local function typeToken(text) 
-  print(text)
-  return text 
-end -- TODO drop?
+local function typeToken(text) return text end 
 
 -- **Container Handlers: Make LLS entries of elements which may be or may be in containers.**
 
@@ -156,10 +132,10 @@ function groupContainer(text, line)
 end
 
 function tupleContainer(text, line) 
-  local insideTable = string.match(text, "[(.-)]%s*$")
+  local insideTable = string.match(text, "%[(.-)%]")
   local tableEntry = makeEntry(insideTable, line)
-  -- need to strip off any tags in table entry
-  return tag(text, "%b[]").."["..tableEntry.."]" -- ..optional(text) 
+  local stripped = stripTag(tableEntry) -- need to strip off any tags in table entry
+  return tag(text, "%b[]").."["..stripped.."]" -- ..optional(text) 
 end
 
 function funContainer(text, line) -- leaky returns, use group to contain funContainer
@@ -171,19 +147,8 @@ function funContainer(text, line) -- leaky returns, use group to contain funCont
   return funEntry
 end
 
---[[
 function literalsContainer(text, line) 
-  local insideLiterals = string.match(text, "{(.-)}%s*$") -- TODO just "{(.-)}" ?
-  local _, taggedParts = makeEntry(insideLiterals, line)
-  local literalsParts = {}; for _, literalsPart in ipairs(taggedParts) do
-    literalsParts[#literalsParts + 1] = stripSpaces(stripTag(literalsPart))
-  end; 
-  local literalsEntry = "{"..table.concat(literalsParts, ", ").."}" --..optional(text) 
-  return tag(text, "%b{}")..literalsEntry -- e.g. "{tag1: string, tag2: xyz}"
-end
---]]
-function literalsContainer(text, line) 
-  local insideLiterals = string.match(text, "{(.-)}%s*$") -- TODO just "{(.-)}" ?
+  local insideLiterals = string.match(text, "{(.-)}%s*$") 
   local literalsParts = makeEntry(insideLiterals, line)
   local literalsEntry = "{"..literalsParts.."}" --..optional(text) 
   return tag(text, "%b{}")..literalsEntry -- e.g. "{tag1: string, tag2: xyz}"
@@ -225,17 +190,19 @@ local function elements(text) -- iterator
   local index, parts = 1, restore(hide(text))
   return function() 
     if index > #parts then return end-- terminate iterator
-    local part = parts[index]
-    local handler, matchID = findMatch(part)
-    index = index + 1 
+    local part = parts[index]; local handler, matchID = findMatch(part); index = index + 1 
     return part, handler, matchID
   end
 end
 
+local verbose = false
+
 function makeEntry(text, line) -- containers have elements (which may themselves be containers).
-  if not text then error("signfiles.makeEntry: Can't parse "..line) end
+  if not text then 
+    error("signfiles.makeEntry: Can't parse "..line) 
+  end
   local entries = {}; for element, handler, matchID in elements(text) do
-    -- print(element, matchID)
+    if verbose then print(element, matchID) end
     local LLS = handler(element, line); entries[#entries + 1] = LLS 
   end;  -- new table for each recursion
   local entry = table.concat(entries, ", ")
@@ -265,16 +232,16 @@ local function makeType(typeAPI) --
   return "\n-- "..line.."\n"..qualified.."---@alias "..name.." "..returns.." # "..description.."\n"
 end
 
+local doChild = {["function"] = makeFunction, ["value"] = makeType} -- api has bracketed names
+
+function signfiles.test(libChildEntry) verbose = true; return doChild[libChildEntry.type](libChildEntry) end
+
 local function writeLines (outLines, outFile, outName, verbose) 
   for _, line in ipairs(outLines) do outFile:write(line, "\n") end 
   if verbose then print(#outLines.." lines written in "..outName) end
 end
 
 -- **Process api** file
-
-local doChild = {["function"] = makeFunction, ["value"] = makeType} -- api has bracketed names
-
-function signfiles.test(libChildEntry) return doChild[libChildEntry.type](libChildEntry) end
 
 local function commaSplit(text)
   local items = {}; items[#items + 1] = string.match(text, "([^,]*),?"); -- first
