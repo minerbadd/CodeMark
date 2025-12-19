@@ -14,6 +14,34 @@ local signfiles = dofile(CodeMark.."signfiles.lua")
 local testData = {
   
   {
+  ["type"] = "value",
+  ["returns"] = " `[call: \":\", failure: \":\", cause: \":\", remaining: #:, :xyzf:, :direction:, operation: \":\"]`",
+  ["name"] = "recovery",
+  ["description"] = "For some errors",
+}, 
+  
+  {
+  ["type"] = "value",
+  ["returns"] = " `{:position:, :facing:, fuel: situation.fuel, level: situation.level}`",
+  ["name"] = "situation",
+  ["description"] = "Dead reckoning",
+},
+  
+  {
+  ["type"] = "value",
+  ["returns"] = " `{x: #:, y: #:, z: #:}`",
+  ["name"] = "position",
+  ["description"] = "Computercraft co-ordinates (+x east, +y up, +z south)",
+}, 
+  
+  {
+    ["type"] = "value",
+    ["returns"] = " `tagged: [key: \":\"]: any`",
+    ["name"] = "features",
+    ["description"] = "Dictionary of string key, any value pairs",
+  },
+  
+  {
     ["type"] = "value",
     ["returns"] = " `[xyz, xyz]`",
     ["name"] = "bounds",
@@ -35,12 +63,7 @@ local testData = {
     ["name"] = "farm.put",
     ["description"] = "Puts found item in aimed direction.",
   },
-  {
-    ["type"] = "value",
-    ["returns"] = " `[key: \":\"]: any`",
-    ["name"] = "features",
-    ["description"] = "Dictionary of string key, any value pairs",
-  },
+  
   {
     ["returns"] = " `^:, \":\", #: &:` <-",
     ["args"] = "arguments: [op: \":\", placeName: \":\", borePlansFileOrLevels: \":\"|#:, shaftPlansFile: \":\"]",

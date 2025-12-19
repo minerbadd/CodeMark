@@ -1,10 +1,10 @@
--- **Generate Lua Language Server `signs` (signature) files from api file**
+-- **Generate Lua Language Server `signs` (signature) files from project api file**
 
 local signfiles = {}
 
 -- **Utility Functions**
 
-local strippers =  {"(%?)%?*", "`(.-)`", "(.-)`", "(.-)<%-", "(.-)&(.*)",  "(.-)\n",}
+local strippers =  {"(%?)%?*", "`(.-)`", "(.-)`", "(.-)<%-", "(.-)&(.*)",  "(.-)\n",} --  "(%?)%?*" reduce multiple "?"
 
 local function stripOther(text, index)
   if index > #strippers then return text end
@@ -12,37 +12,31 @@ local function stripOther(text, index)
   return stripOther(stripped, index + 1)
 end
 
-local function stripTag(text) return string.gsub(text, "[_%w]-:(.+)$", "%1") end
+--local function stripTag(text) return string.gsub(text, "[_%w]-:(.+)$", "%1") end
 
-local function stripSpaces(text) return string.gsub(text, "%s*(%w-)%s*", "%1") end
+--local function stripSpaces(text) return string.gsub(text, "%s*(%w-)%s*", "%1") end
 
 local function stripNewLine(text) return string.gsub(text, "\n(.+)", "%1") end
-
-local function optional(text)
+--[[
+local function optional(text) -- reduce multiple "?" to just one TODO: redundant?
   local question = string.match(text, "{.-}([%?]*)") 
   return (question and question ~= "") and  "?" or ""
 end
+--]]
+-- **Partition Text Keeping Containers Whole** (by hiding commas)
 
--- **Partition Text Keeping Containers Whole**
-
-local containers = { 
-  -- (leaky)funContainer,   groupContainer,     (leaky)dictionary,      literalsContainer,   tableContainer
-  {"%b():", "%(.-%):.-$"}, {"%b()", "%b()"}, {"%b[]:", "%[.-%]:.-$"}, {":%b[]", ":%b[]"}, {"%b{}", "%b{}"}, 
+local containers = {"%b()", "%b[]", "%b{}",}
+--[[
+{
+  -- {"%b():", "%(.-%):.-$"}, -- function
+  {"%b()", "%b()"}, -- group and function
+  -- {"%b[]:", "%[.-%]:.-$"}, -- dictionary
+  {"%b[]", "%b[]"}, -- tuple, array, and dictionary
+  {"%b{}", "%b{}"},  -- table including literals
 }
-local function partition(pattern) -- iterator factory
-  return function(text) -- handles single and last parts
-    local position, length = 1, string.len(text)
-    return function() 
-      if position > length then return end -- terminate iterator
-      local first, last = string.find(text, pattern, position)
-      local ending = (first and first < last) and last or length + 1
-      local current = position; position = ending + 1
-      return string.sub(text, current, ending - 1); 
-    end
-  end
-end
+--]]
 
-local function replace(patterns) -- generate function
+local function replace(patterns) -- generate function to replace patterns for gsub
   local function replacing(text, index)
     if index > #patterns then return text end 
     local replaced = string.gsub(text, table.unpack(patterns[index]))
@@ -50,21 +44,41 @@ local function replace(patterns) -- generate function
   end; return replacing
 end
 
-local function hider(text) return replace({ {",", ";"} })(text, 1) end
-
-local function hide(text)
+local function hider(text) return replace({ {",", ";"} })(text, 1) end -- specialize replacer
+--[[
+local function hide(text) -- commas to semicolons inside container 
   for _, container in ipairs(containers) do
     local finder, target = table.unpack(container)
     local found = string.find(text, finder)
-    if found then return string.gsub(text, target, hider) end
-  end; return text -- not a container: no need for hiding
+    if found then return string.gsub(text, target, hider) end -- apply hider to targets in text
+  end; return text -- not a container: no need for hiding commas
+end
+--]]
+local function hide(text) -- commas to semicolons inside container 
+  for _, target in ipairs(containers) do
+    local found = string.find(text, target)
+    if found then return string.gsub(text, target, hider) end -- apply hider to targets in text
+  end; return text -- not a container: no need for hiding commas
 end
 
-local function restorer(text) return replace({ {";", ","} })(text, 1) end
+local function restorer(text) return replace({ {";", ","} })(text, 1) end -- and back to commas
 
-local function restore(text) -- make table of restored parts
-  local parts = {}; for part in partition("([^,]-),")(text) do
-    parts[#parts + 1] = restorer(part)
+local function partition(pattern) -- iterator factory
+  return function(text) -- make iterator for partitioning pattern in text
+    local position, length = 1, string.len(text)
+    return function() -- iterator on text pattern handles single and last parts
+      if position > length then return end -- terminate iterator
+      local first, last = string.find(text, pattern, position)
+      local ending = (first and first < last) and last or length + 1
+      local current = position; position = ending + 1
+      return string.sub(text, current, ending - 1); -- partial string
+    end
+  end
+end
+
+local function restore(text) -- make table of restored parts (no partition of container)
+  local parts = {}; for part in partition("([^,]-),")(text) do -- break into parts of text ending in commas
+    parts[#parts + 1] = restorer(part) -- any semicolons back to commas for each part
   end; return parts
 end
 
@@ -90,13 +104,19 @@ local function numberToken(text) return string.gsub(text, "#:", "number") end
 
 local function typeTwiceToken(text) return string.gsub(text, ":([_%a%d]-):", "%1: %1") end
 
-local function typeTaggedToken(text) return text end
+local function typeTaggedToken(text) 
+  print(text); 
+  return text 
+end -- TODO drop?
 
-local function typeToken(text) return text end
+local function typeToken(text) 
+  print(text)
+  return text 
+end -- TODO drop?
 
--- **Containers and Array Element Handlers: Make entries of elements which may be or may be in containers.**
+-- **Container Handlers: Make LLS entries of elements which may be or may be in containers.**
 
-local makeEntry, union, array, dictionary, groupContainer, tableContainer, funContainer, literalsContainer -- mutual recursions
+local makeEntry, union, array, dictionary, groupContainer, funContainer, tupleContainer, literalsContainer -- mutual recursions
 
 function union(text, line)
   local beforeText, afterText = string.match(text, "(.-)|(.*)")
@@ -108,37 +128,38 @@ end
 function array(text, line) -- not a tuple, just the [] marker is enough
   local beforeArray = string.match(text, "(.-)%[%]")
   local arrayEntry = makeEntry(beforeArray, line) 
-  return arrayEntry.."[]"..optional(text) 
+  return arrayEntry.."[]" --..optional(text) 
 end
 
-local function tag(text, pattern)
+local function tag(text, pattern) -- find label aka tag before pattern and ending in ":"
   local patternStart = assert(string.find(text, pattern), "missing pattern "..pattern.." in "..text)
-  local beforePart = string.sub(text, 1, patternStart - 1)
+  local beforePart = string.sub(text, 1, patternStart - 1) -- just the part before the pattern
   local beforeText = string.match(beforePart, "(.-):")
   if not beforeText then return "" end
   return beforeText..": "
 end
 
 function dictionary(text, line)
-  local keyPart = string.match(text, "%[(.-)%]")
+  local keyPart = string.match(text, "%[(.-)%]") -- may include tag
   local tagPart = string.match(keyPart, "(.-):") -- [tag: keyType]:
   local key = tagPart and string.match(keyPart, ".-:(.*)$") or keyPart
   local value = string.match(text, "%[.-%]:(.*)")
-  local keyEntry = makeEntry(key, line)
-  local valueEntry = makeEntry(value, line)
-  return tag(text, "%b[]").."{["..keyEntry.."]:"..valueEntry.."}"
+  local keyEntry = makeEntry(key, line) -- process key recursively
+  local valueEntry = makeEntry(value, line) -- process value recursively
+  return tag(text, "%b[]").."{ ["..keyEntry.."]:"..valueEntry.." }"
 end
 
 function groupContainer(text, line) 
   local insideGroup = string.gsub(text, "%((.-)%)", "%1")
   local groupEntry = makeEntry(insideGroup, line)
-  return tag(text, "%b()").."("..groupEntry..")"..optional(text)
+  return tag(text, "%b()").."("..groupEntry..")" -- ..optional(text)
 end
 
 function tupleContainer(text, line) 
   local insideTable = string.match(text, "[(.-)]%s*$")
   local tableEntry = makeEntry(insideTable, line)
-  return tag(text, "%b[]").."{"..tableEntry.."}"..optional(text) 
+  -- need to strip off any tags in table entry
+  return tag(text, "%b[]").."["..tableEntry.."]" -- ..optional(text) 
 end
 
 function funContainer(text, line) -- leaky returns, use group to contain funContainer
@@ -150,25 +171,36 @@ function funContainer(text, line) -- leaky returns, use group to contain funCont
   return funEntry
 end
 
+--[[
 function literalsContainer(text, line) 
-  local insideLiterals = string.match(text, "{(.-)}%s*$")
+  local insideLiterals = string.match(text, "{(.-)}%s*$") -- TODO just "{(.-)}" ?
   local _, taggedParts = makeEntry(insideLiterals, line)
   local literalsParts = {}; for _, literalsPart in ipairs(taggedParts) do
     literalsParts[#literalsParts + 1] = stripSpaces(stripTag(literalsPart))
   end; 
-  local literalsEntry = "{"..table.concat(literalsParts, ", ").."}"..optional(text) 
-  return tag(text, "%b{}")..literalsEntry -- e.g. "{string, xyz}"
+  local literalsEntry = "{"..table.concat(literalsParts, ", ").."}" --..optional(text) 
+  return tag(text, "%b{}")..literalsEntry -- e.g. "{tag1: string, tag2: xyz}"
+end
+--]]
+function literalsContainer(text, line) 
+  local insideLiterals = string.match(text, "{(.-)}%s*$") -- TODO just "{(.-)}" ?
+  local literalsParts = makeEntry(insideLiterals, line)
+  local literalsEntry = "{"..literalsParts.."}" --..optional(text) 
+  return tag(text, "%b{}")..literalsEntry -- e.g. "{tag1: string, tag2: xyz}"
 end
 
 local finders = { -- **Ordered most carefully; matchID string for debug**
 
   {"({:})", tableToken,  "tableToken"}, {"(%(:%))", functionToken, "functionToken"}, 
-  
+
   {"|", union, "union"},
 
-  {"%b():.-$", funContainer, "funContainer"},  {"%b[]:", dictionary, "dictionary"}, 
-  {".-%[%]", array, "array"}, {"[^%^#@_]%b{}", literalsContainer, "literalsContainer"}, 
-  {"%b[]:", dictionary, "dictionary"}, {"%b()", groupContainer, "groupContainer"}, 
+  {"%b():.-$", funContainer, "funContainer"},  
+  {"%b[]:", dictionary, "dictionary"}, 
+  {".-%[%]", array, "array"}, 
+  --{"[^%^#@_]%b{}", literalsContainer, "literalsContainer"}, 
+  {"%b{}", literalsContainer, "literalsContainer"}, 
+  {"%b()", groupContainer, "groupContainer"}, 
   {"%b[]", tupleContainer, "tupleContainer"},
 
   {"(#:)", numberToken, "numberToken"},   {'(":")', stringToken, "stringToken"}, 
@@ -176,8 +208,8 @@ local finders = { -- **Ordered most carefully; matchID string for debug**
   {"(_:)", placeToken, "placeToken"}, {"nil", nilToken, "nilToken"},  {"any", anyToken, "anyToken"},
 
   {":([%a%d%.]-):", typeTwiceToken, "typeTwiceToken"}, 
-  {":%s-([%a%d%.]+)", typeTaggedToken, "typeTaggedToken"}, 
-  {"([%a%d%.%s]*)", typeToken, "typeToken"}
+  {":%s-([%w%.]+)", typeTaggedToken, "typeTaggedToken"}, 
+  {"([%w%.%s]*)", typeToken, "typeToken"}
 }
 -- **Match Elements Iterator to Make Entries**
 
@@ -185,7 +217,7 @@ local function findMatch(part) -- for part
   for _, finder in ipairs(finders) do
     local pattern, handler, matchID = table.unpack(finder)
     local found = string.find(part, pattern)
-    if found then return handler,  matchID end
+    if found then return handler, matchID end
   end
 end
 
@@ -201,9 +233,9 @@ local function elements(text) -- iterator
 end
 
 function makeEntry(text, line) -- containers have elements (which may themselves be containers).
-  if not text then 
-    error("signfiles.makeEntry: Can't parse "..line) end
-  local entries = {}; for element, handler in elements(text) do
+  if not text then error("signfiles.makeEntry: Can't parse "..line) end
+  local entries = {}; for element, handler, matchID in elements(text) do
+    -- print(element, matchID)
     local LLS = handler(element, line); entries[#entries + 1] = LLS 
   end;  -- new table for each recursion
   local entry = table.concat(entries, ", ")
@@ -220,7 +252,7 @@ local function makeFunction(functionAPI)
   local description = "\n-- "..stripNewLine(functionAPI.description or "")
   local markLine, typeLine  = "-- "..line, "---@type fun("..args.."): "..(returns or "")
   local functionLine = "function "..functionAPI.name.."() end"
-  return description.."\n"..markLine..typeLine.."\n"..functionLine
+  return description.."\n"..markLine.."\n"..typeLine.."\n"..functionLine
 end
 
 local function makeType(typeAPI) -- 
