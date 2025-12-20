@@ -136,12 +136,12 @@ Lua tables can also be used as (implicityly indexed) arrays. Here's an example o
 
 Arrays with a fixed number of elements we'll call _tuples_. As for dictionary keys, CodeMark provides for labeling of tuple elements (stripped away for LLS):
 
-`--:> xyz:` _Minecraft coordinates: +x: east, +y: up, +z: south_ -> `[x: #:, y: #:, z: #:]`
+`--:> xyz:` _Minecraft coordinates: +x: east, +y: up, +z: south_ -> `:[x: #:, y: #:, z: #:]`
 
  Specific kinds of tables can be thought of as being a new type which is a subtype of tables as in the examples above. Here's another example. The following function has one argument, `targets`, an array of strings. It returns a `detail` or `nil`. A `detail` is a table accessed by table literals: `name`, `count`, and `damage`. Each of these is typed and described.
 
 `--:: core.findItems(targets: ":"[])` -> _Selects found slot._ -> `detail?`  
-`--:> detail:` _Defined by Computercraft_ -> `[name: detail.name, count: detail.count, damage: detail.damage]`  
+`--:> detail:` _Defined by Computercraft_ -> `:[name: detail.name, count: detail.count, damage: detail.damage]`  
 `--:> detail.name:` _Prepended by the mod name `"minecraft:"`._ -> `":"`  
 `--:> detail.count:` _Available in inventory_ -> `#:` 
 `--:> detail.damage:` _Distinguishing value_ -> `#:` 
@@ -160,9 +160,7 @@ Type declarations may, of course, be build up from other declared types:
 
 `--:: core.vectorPairs(start: bounds, addend: xyz, number: #:, partial: bounds?)` -> _Make plots._ -> `bounds[]`  
 
-`--:> bounds:` _Vector pair, a tuple, defining a rectangular solid_ -> `[xyz, xyz]`
-
-_(Making use of LLS support for tuples.)_
+`--:> bounds:` _Vector pair, a tuple, defining a rectangular solid_ -> `:[xyz, xyz]`
 
 The function takes a `bounds` table for its `start`, an addend, `addend: xyz` (which, as indicated, is an `xyz` table), a `number`, `#:`, and an additional optional `bounds` table. It returns an array of `bounds`.
 

@@ -12,48 +12,55 @@ local CodeMark =  table.concat(files, "/", 1, #files - 1).."/"
 local signfiles = dofile(CodeMark.."signfiles.lua")
 
 local testData = {
-  
-  {
-  ["type"] = "value",
-  ["returns"] = " `[call: \":\", failure: \":\", cause: \":\", remaining: #:, :xyzf:, :direction:, operation: \":\"]`",
-  ["name"] = "recovery",
-  ["description"] = "For some errors",
-}, 
-  
-  {
-  ["type"] = "value",
-  ["returns"] = " `{:position:, :facing:, fuel: situation.fuel, level: situation.level}`",
-  ["name"] = "situation",
-  ["description"] = "Dead reckoning",
-},
-  
-  {
-  ["type"] = "value",
-  ["returns"] = " `{x: #:, y: #:, z: #:}`",
-  ["name"] = "position",
-  ["description"] = "Computercraft co-ordinates (+x east, +y up, +z south)",
-}, 
-  
+
   {
     ["type"] = "value",
-    ["returns"] = " `tagged: [key: \":\"]: any`",
-    ["name"] = "features",
-    ["description"] = "Dictionary of string key, any value pairs",
+    ["returns"] = " :[puttings: \":\"[] , direction: \":\", distance: #:]`",
+    ["name"] = "_task.puts",
+    ["description"] = "Common arguments",
   },
-  
+
+  {
+    ["type"] = "value",
+    ["returns"] = " `[call: \":\", failure: \":\", cause: \":\", remaining: #:, :xyzf:, :direction:, operation: \":\"]`",
+    ["name"] = "recovery",
+    ["description"] = "For some errors",
+  }, 
+
   {
     ["type"] = "value",
     ["returns"] = " `[xyz, xyz]`",
     ["name"] = "bounds",
     ["description"] = "Vector pair (not table literals) defining a rectangular solid",
   },
-  
+
   {
-  ["returns"] = " \":\" &!` <-",
-  ["args"] = "arguments: _task.puts, op: (:), clear: ^:, fill: \":\"?, targets: \":\"[]?",
-  ["type"] = "function",
-  ["name"] = "_task.doTask",
-  ["description"] = "Tasks",
+    ["type"] = "value",
+    ["returns"] = " `{:position:, :facing:, fuel: situation.fuel, level: situation.level}`",
+    ["name"] = "situation",
+    ["description"] = "Dead reckoning",
+  },
+
+  {
+    ["type"] = "value",
+    ["returns"] = " `{x: #:, y: #:, z: #:}`",
+    ["name"] = "position",
+    ["description"] = "Computercraft co-ordinates (+x east, +y up, +z south)",
+  }, 
+
+  {
+    ["type"] = "value",
+    ["returns"] = " `tagged: [key: \":\"]: any`",
+    ["name"] = "features",
+    ["description"] = "Dictionary of string key, any value pairs",
+  },
+
+  {
+    ["returns"] = " \":\" &!` <-",
+    ["args"] = "arguments: _task.puts, op: (:), clear: ^:, fill: \":\"?, targets: \":\"[]?",
+    ["type"] = "function",
+    ["name"] = "_task.doTask",
+    ["description"] = "Tasks",
   },
 
   {
@@ -63,7 +70,7 @@ local testData = {
     ["name"] = "farm.put",
     ["description"] = "Puts found item in aimed direction.",
   },
-  
+
   {
     ["returns"] = " `^:, \":\", #: &:` <-",
     ["args"] = "arguments: [op: \":\", placeName: \":\", borePlansFileOrLevels: \":\"|#:, shaftPlansFile: \":\"]",

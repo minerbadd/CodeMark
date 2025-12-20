@@ -60,7 +60,10 @@ end
 
 local function stripTag(text) 
   local parts, stripped  = restore(text), {}
-  for _, part in ipairs(parts) do stripped[#stripped + 1] = string.match(part, "[_%w]-:(.+)") end
+  for _, part in ipairs(parts) do 
+    local match = string.match(part, "[_%w]-:(.*)$")
+    stripped[#stripped + 1] =  match or part 
+  end
   return table.concat(stripped, ", ")
 end
 
@@ -132,7 +135,7 @@ function groupContainer(text, line)
 end
 
 function tupleContainer(text, line) 
-  local insideTable = string.match(text, "%[(.-)%]")
+  local insideTable = string.match(text, "%[(.*)%]")
   local tableEntry = makeEntry(insideTable, line)
   local stripped = stripTag(tableEntry) -- need to strip off any tags in table entry
   return tag(text, "%b[]").."["..stripped.."]" -- ..optional(text) 
@@ -156,17 +159,17 @@ end
 
 local finders = { -- **Ordered most carefully; matchID string for debug**
 
-  {"({:})", tableToken,  "tableToken"}, {"(%(:%))", functionToken, "functionToken"}, 
+  {"({:})", tableToken,  "tableToken"}, {"(%(:%))", functionToken, "functionToken"}, {"(%[:%])", array, "arrayToken"},
 
   {"|", union, "union"},
 
   {"%b():.-$", funContainer, "funContainer"},  
   {"%b[]:", dictionary, "dictionary"}, 
-  {".-%[%]", array, "array"}, 
-  --{"[^%^#@_]%b{}", literalsContainer, "literalsContainer"}, 
+  {":%b[]", tupleContainer, "tupleContainer"},
+
+  {"%[%]", array, "array"}, -- [] can't stand alone, use [:]
   {"%b{}", literalsContainer, "literalsContainer"}, 
   {"%b()", groupContainer, "groupContainer"}, 
-  {"%b[]", tupleContainer, "tupleContainer"},
 
   {"(#:)", numberToken, "numberToken"},   {'(":")', stringToken, "stringToken"}, 
   {"(%^:)", booleanToken, "booleanToken"}, {"(@:)", userdataToken, "userdataToken"}, 
@@ -182,7 +185,9 @@ local function findMatch(part) -- for part
   for _, finder in ipairs(finders) do
     local pattern, handler, matchID = table.unpack(finder)
     local found = string.find(part, pattern)
-    if found then return handler, matchID end
+    if found then 
+      return handler, matchID 
+    end
   end
 end
 
