@@ -1,1 +1,1 @@
-CodeMark <a href="docs/Annotations.html"> documentation</a> is in docs/Annotations.html
+CodeMark <a href="https://minerbadd.github.io/CodeMark/docs/Annotations.html"> documentation</a> is in docs/Annotations.html

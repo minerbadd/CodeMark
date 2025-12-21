@@ -89,9 +89,8 @@ local function makeOut(outName)
   return realized..outStub..".html" -- replace fileName extension with `html`
 end
 
-local assets = assert(os.getenv("CODEMARK_ASSETS"), "CODEMARK_ASSETS enviroment variable not found").."/" 
---https://minerbadd.github.io/CodeMark/assets
---local assets = "https://github.com/minerbadd/CodeMark/blob/main/assets/"
+--local assets = assert(os.getenv("CODEMARK_ASSETS"), "CODEMARK_ASSETS enviroment variable not found").."/" 
+local assets = "https://minerbadd.github.io/CodeMark/assets/"
 local prismCSS, prismJS, downmarkCSS = assets.."prism.css", assets.."prism.js", assets.."downmark.css"
 local downMarkLink = '<link href="'..downmarkCSS..'" rel="stylesheet" />\n'
 local prismLink = '<link href="'..prismCSS..'" rel="stylesheet" />\n'

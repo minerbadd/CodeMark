@@ -120,7 +120,7 @@ There are ten of these sharing the common definition and generating type informa
 
 ## Type Annotations: Tables and Subtypes of Tables
 
-Tables are a critical building block for Lua scripts. A Lua table can be an _array_, a _dictionary_, or what LLS calls _table literals_. (The last are accessed using the dot notation as seen in the function names above.) Each has its own annotation. A table can also be typed as just a table with no other information as `{:}`.  But there's more. 
+Tables are a critical building block for Lua scripts. A Lua table can be an _array_, a _dictionary_, or what LLS calls _table literals_. (The last are accessed using the dot notation as seen in the function names above.) Each has its own annotation. A table can also be typed as just a table with no other information as `{:}`, an array as `[:]`. pBut there's more. 
 
 Tables as dictionaries and what LLS calls table literals are annotated as follows:
 
