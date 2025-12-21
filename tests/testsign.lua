@@ -13,6 +13,28 @@ local signfiles = dofile(CodeMark.."signfiles.lua")
 
 local testData = {
 
+
+  {
+    ["type"] = "value",
+    ["returns"] = " `xyz[] | [core.faces]: xyz`",
+    ["name"] = "xyzMap",
+    ["description"] = "Table of vectors either an array or dictionary",
+  },
+  
+  {
+    ["type"] = "value",
+    ["returns"] = " {start: \":\"[], odd: \":\"[], even: \":\"[], last: \":\"[]}`",
+    ["name"] = "paths",
+    ["description"] = "Flying ox traverse of three dimensional rectangular solid",
+  },
+
+  {
+    ["type"] = "value",
+    ["returns"] = " (markerName: \":\", :bores:):  `marking[]`",
+    ["name"] = "mine.post",
+    ["description"] = "Navigate shaft and bores to go to marker.",
+  },
+
   {
     ["returns"] = " `^:, \":\", #: &:` <-",
     ["args"] = "arguments: [op: \":\", placeName: \":\", borePlansFileOrLevels: \":\"|#:, shaftPlansFile: \":\"]",
@@ -25,14 +47,6 @@ local testData = {
     ["returns"] = " [puttings: \":\"[] , direction: \":\", distance: #:]`",
     ["name"] = "_task.puts",
     ["description"] = "Common arguments",
-  },
-
-
-  {
-    ["type"] = "value",
-    ["returns"] = " {start: \":\"[], odd: \":\"[], even: \":\"[], last: \":\"[]}`",
-    ["name"] = "paths",
-    ["description"] = "Flying ox traverse of three dimensional rectangular solid",
   },
 
   {

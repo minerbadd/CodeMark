@@ -4,7 +4,7 @@ local signfiles = {}
 
 -- **Utility Functions**
 
-local strippers =  {"(%?)%?*", "`(.-)`", "(.-)`", "(.-)<%-", "(.-)&(.*)",  "(.-)\n", "(.-)!",} --  "(%?)%?*" reduce multiple "?"
+local strippers =  {"(%?)%?*", "`(.-)`", "(.-)`", "(.-)<%-", "(.-)&(.*)",  "(.-)\n"} --  "(%?)%?*" reduce multiple "?"
 
 local function stripOther(text, index)
   if index > #strippers then return text end
@@ -32,7 +32,7 @@ local function hider(text) return replace({ {",", ";"}, })(text, 1) end -- speci
 
 local function hide(text) -- commas to semicolons inside container 
   for _, container in ipairs(containers) do local found = string.match(text, container) 
-    if found then return string.gsub(text, container, hider) end -- apply hider to targets in text
+    if found and found ~= "[]" then return string.gsub(text, container, hider) end -- apply hider to targets in text
   end; return text -- not a container: no need for hiding commas 
 end
 
@@ -143,7 +143,7 @@ end
 function funContainer(text, line) -- leaky returns, use group to contain funContainer
   local argsPart, returnsPart = string.match(text, "(%b()):(.-)$")
   local strippedReturns = stripOther(returnsPart, 1) 
-  local insideArgs = string.match(text, "%((.-)%)")
+  local insideArgs = string.match(argsPart, "%((.-)%)")
   local argsEntry = makeEntry(insideArgs, line)
   local returnsEntry = makeEntry(strippedReturns, line)
   local funEntry = "fun("..argsEntry.."): "..returnsEntry
