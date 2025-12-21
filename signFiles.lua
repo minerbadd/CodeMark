@@ -18,7 +18,7 @@ local function stripNewLine(text) return string.gsub(text, "\n(.+)", "%1") end
 
 -- **Partition Text Keeping Containers Whole** (by hiding commas)
 
-local containers = {"%b()", "%b[]", "%b{}",}
+local containers = { "%b[]", "%b()", "%b{}",}
 
 local function replace(patterns) -- generate function to replace patterns for gsub
   local function replacing(text, index)
@@ -28,11 +28,13 @@ local function replace(patterns) -- generate function to replace patterns for gs
   end; return replacing
 end
 
-local function hider(text) return replace({ {",", ";"} })(text, 1) end -- specialize replacer
+local function hider(text) 
+  return replace({ {",", ";"} })(text, 1) 
+end -- specialize replacer
 
 local function hide(text) -- commas to semicolons inside container 
   for _, target in ipairs(containers) do
-    local found = string.find(text, target)
+    local found = string.match(text, target)
     if found then return string.gsub(text, target, hider) end -- apply hider to targets in text
   end; return text -- not a container: no need for hiding commas
 end
@@ -163,13 +165,13 @@ local finders = { -- **Ordered most carefully; matchID string for debug**
 
   {"|", union, "union"},
 
-  {"%b():.-$", funContainer, "funContainer"},  
-  {"%b[]:", dictionary, "dictionary"}, 
-  {":%b[]", tupleContainer, "tupleContainer"},
+  {"(%b():.-$)", funContainer, "funContainer"},  
+  {"(%b{})", literalsContainer, "literalsContainer"}, 
+  {"(%b[]):", dictionary, "dictionary"}, 
+  {"(%b[])", tupleContainer, "tupleContainer"},
+  {"(%b())", groupContainer, "groupContainer"}, 
 
-  {"%[%]", array, "array"}, -- [] can't stand alone, use [:]
-  {"%b{}", literalsContainer, "literalsContainer"}, 
-  {"%b()", groupContainer, "groupContainer"}, 
+  {"(.+%[%])", array, "array"}, -- [] can't stand alone, use [:]
 
   {"(#:)", numberToken, "numberToken"},   {'(":")', stringToken, "stringToken"}, 
   {"(%^:)", booleanToken, "booleanToken"}, {"(@:)", userdataToken, "userdataToken"}, 
@@ -184,8 +186,8 @@ local finders = { -- **Ordered most carefully; matchID string for debug**
 local function findMatch(part) -- for part
   for _, finder in ipairs(finders) do
     local pattern, handler, matchID = table.unpack(finder)
-    local found = string.find(part, pattern)
-    if found then 
+    local found = string.match(part, pattern)
+    if found and found ~= "[]" then 
       return handler, matchID 
     end
   end
@@ -239,7 +241,7 @@ end
 
 local doChild = {["function"] = makeFunction, ["value"] = makeType} -- api has bracketed names
 
-function signfiles.test(libChildEntry) verbose = true; return doChild[libChildEntry.type](libChildEntry) end
+function signfiles.test(libChildEntry) verbose = false; return doChild[libChildEntry.type](libChildEntry) end
 
 local function writeLines (outLines, outFile, outName, verbose) 
   for _, line in ipairs(outLines) do outFile:write(line, "\n") end 

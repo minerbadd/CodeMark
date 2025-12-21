@@ -12,13 +12,36 @@ local CodeMark =  table.concat(files, "/", 1, #files - 1).."/"
 local signfiles = dofile(CodeMark.."signfiles.lua")
 
 local testData = {
-
+  
   {
     ["type"] = "value",
-    ["returns"] = " :[puttings: \":\"[] , direction: \":\", distance: #:]`",
+    ["returns"] = " `(value: any): value: any`",
+    ["name"] = "closing",
+    ["description"] = "Returns value or sets it and optional table entry to non `nil` `value`.",
+  },
+  
+  {
+    ["returns"] = " `^:, \":\", #: &:` <-",
+    ["args"] = "arguments: [op: \":\", placeName: \":\", borePlansFileOrLevels: \":\"|#:, shaftPlansFile: \":\"]",
+    ["type"] = "function",
+    ["name"] = "mine.op",
+    ["description"] = "Dig. Dig shaft; go to post at level; bore, mark, and torch; get ores. Markers hold saved plans.",
+  },
+  {
+    ["type"] = "value",
+    ["returns"] = " [puttings: \":\"[] , direction: \":\", distance: #:]`",
     ["name"] = "_task.puts",
     ["description"] = "Common arguments",
   },
+
+  
+  {
+  ["type"] = "value",
+  ["returns"] = " {start: \":\"[], odd: \":\"[], even: \":\"[], last: \":\"[]}`",
+  ["name"] = "paths",
+  ["description"] = "Flying ox traverse of three dimensional rectangular solid",
+},
+
 
   {
     ["type"] = "value",
@@ -50,7 +73,7 @@ local testData = {
 
   {
     ["type"] = "value",
-    ["returns"] = " `tagged: [key: \":\"]: any`",
+    ["returns"] = " `[key: \":\"]: any`",
     ["name"] = "features",
     ["description"] = "Dictionary of string key, any value pairs",
   },
@@ -105,7 +128,7 @@ local testData = {
   },
   {
     ["returns"] = " `nil`  <-",
-    ["args"] = 'turtle: ":", __: "tail", rate: #:?, test: []',
+    ["args"] = 'turtle: ":", _: "tail", rate: #:?, test: []',
     ["type"] = "function",
     ["name"] = "remote.tail",
     ["description"] = "Repeatedly towards player position, default rate 0.5 seconds.",
@@ -233,15 +256,15 @@ local testData = {
   },
 
   {
-    ["returns"] = " ok: `true|false, result: ...|\":\", ::?` <-",
-    ["args"] = "ok: ^:, ...: ::  ",
+    ["returns"] = " ok: `true|false, result: ...|\":\", any?` <-",
+    ["args"] = "ok: ^:, ...: any  ",
     ["type"] = "function",
     ["name"] = "core.pass",
     ["description"] = "Pass input but report string if not ok.",
   },
   {  
     ["returns"] = " `\"return \"..\":\" &!` <-",  
-    ["args"] = "input: ::  ",
+    ["args"] = "input: any  ",
     ["type"] = "function",
     ["name"] = "core.serialize",
     ["description"] = "Executable string to instantiate input.",
@@ -268,7 +291,7 @@ local testData = {
 
   {
     ["returns"] =  ' \":\" ',
-    ["args"] = "(commands: [command: \":\", direction: facing])_  ",
+    ["args"] = "commands: [command: \":\", direction: facing]_  ",
     ["type"] = "function",
     ["name"] = "_gps.equip",
     ["description"] = "Assemble parts.",
@@ -276,7 +299,7 @@ local testData = {
 
   {
     ["returns"] = " `(): \"done\", remaining: #:, xyzf, direction &!recovery` <-",
-    ["args"] = ":(count: #:?)  ",
+    ["args"] = "count: #:?  ",
     ["type"] = "function",
     ["name"] = "step.left",
     ["description"] = "Iterator (default 1 step)",
@@ -284,19 +307,12 @@ local testData = {
 
   {
     ["returns"] = " (): `name: \":\", label: \":\", xyz, distance: #:, situations, serialized: \":\"` <-" ,
-    ["args"] = "(span: #:?, reference: \":\"?|position?)  ",
+    ["args"] = "span: #:?, reference: \":\"?|position?  ",
     ["type"] = "function",
     ["name"] = "place.near",
     ["description"] = "If both the span and name or position are specified, return places within a span of blocks of the named place or position. If only the span is specified, return places within a span of blocks of the current situation or player position. If neither is specified return each of the named places. In any case, iterator returns include serialized places.",
   },
-  {
-    ["args"] = "(commandLine: \":\", bogus: ((foo: #:): ^:, #:), scam: (mum: ^:): (:), {:})  ",
-    ["type"] = "function",
-    ["name"] = "exec.fakeop",
-    ["description"] = "CLI for Command Computer commands",
-  },
-
-}
+  }
 
 for i, item in ipairs(testData) do 
   local result = signfiles.test(item)
