@@ -12,14 +12,7 @@ local CodeMark =  table.concat(files, "/", 1, #files - 1).."/"
 local signfiles = dofile(CodeMark.."signfiles.lua")
 
 local testData = {
-  
-  {
-    ["type"] = "value",
-    ["returns"] = " `(value: any): value: any`",
-    ["name"] = "closing",
-    ["description"] = "Returns value or sets it and optional table entry to non `nil` `value`.",
-  },
-  
+
   {
     ["returns"] = " `^:, \":\", #: &:` <-",
     ["args"] = "arguments: [op: \":\", placeName: \":\", borePlansFileOrLevels: \":\"|#:, shaftPlansFile: \":\"]",
@@ -34,14 +27,20 @@ local testData = {
     ["description"] = "Common arguments",
   },
 
-  
-  {
-  ["type"] = "value",
-  ["returns"] = " {start: \":\"[], odd: \":\"[], even: \":\"[], last: \":\"[]}`",
-  ["name"] = "paths",
-  ["description"] = "Flying ox traverse of three dimensional rectangular solid",
-},
 
+  {
+    ["type"] = "value",
+    ["returns"] = " {start: \":\"[], odd: \":\"[], even: \":\"[], last: \":\"[]}`",
+    ["name"] = "paths",
+    ["description"] = "Flying ox traverse of three dimensional rectangular solid",
+  },
+
+  {
+    ["type"] = "value",
+    ["returns"] = " `(value: any): value: any`",
+    ["name"] = "closing",
+    ["description"] = "Returns value or sets it and optional table entry to non `nil` `value`.",
+  },
 
   {
     ["type"] = "value",
@@ -312,7 +311,7 @@ local testData = {
     ["name"] = "place.near",
     ["description"] = "If both the span and name or position are specified, return places within a span of blocks of the named place or position. If only the span is specified, return places within a span of blocks of the current situation or player position. If neither is specified return each of the named places. In any case, iterator returns include serialized places.",
   },
-  }
+}
 
 for i, item in ipairs(testData) do 
   local result = signfiles.test(item)

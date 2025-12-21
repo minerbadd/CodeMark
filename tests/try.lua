@@ -1,6 +1,6 @@
 
-local line =  "abc[]"--  :[start: \":\"[], odd: \":\"[], even: \":\"[], last: \":\"[] ]"  --
-local inside = string.match(line, "(.+%[%])") 
+local line =  " ():(value: any): value: any"
+local inside = string.match(line, "%b():.-$") 
 print(inside)
 
 -- print(line, found)

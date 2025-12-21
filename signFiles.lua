@@ -4,7 +4,7 @@ local signfiles = {}
 
 -- **Utility Functions**
 
-local strippers =  {"(%?)%?*", "`(.-)`", "(.-)`", "(.-)<%-", "(.-)&(.*)",  "(.-)\n",} --  "(%?)%?*" reduce multiple "?"
+local strippers =  {"(%?)%?*", "`(.-)`", "(.-)`", "(.-)<%-", "(.-)&(.*)",  "(.-)\n", "(.-)!",} --  "(%?)%?*" reduce multiple "?"
 
 local function stripOther(text, index)
   if index > #strippers then return text end
@@ -16,30 +16,27 @@ end
 
 local function stripNewLine(text) return string.gsub(text, "\n(.+)", "%1") end
 
--- **Partition Text Keeping Containers Whole** (by hiding commas)
+-- **Partition Text Keeping Containers Whole** (by hiding commas and pipes)
 
 local containers = { "%b[]", "%b()", "%b{}",}
 
 local function replace(patterns) -- generate function to replace patterns for gsub
   local function replacing(text, index)
-    if index > #patterns then return text end 
+    if index > #patterns then return text end -- each new string gets bound by the recursion
     local replaced = string.gsub(text, table.unpack(patterns[index]))
     return replacing(replaced, index + 1)
   end; return replacing
 end
 
-local function hider(text) 
-  return replace({ {",", ";"} })(text, 1) 
-end -- specialize replacer
+local function hider(text) return replace({ {",", ";"}, })(text, 1) end -- specialize replacer
 
 local function hide(text) -- commas to semicolons inside container 
-  for _, target in ipairs(containers) do
-    local found = string.match(text, target)
-    if found then return string.gsub(text, target, hider) end -- apply hider to targets in text
-  end; return text -- not a container: no need for hiding commas
+  for _, container in ipairs(containers) do local found = string.match(text, container) 
+    if found then return string.gsub(text, container, hider) end -- apply hider to targets in text
+  end; return text -- not a container: no need for hiding commas 
 end
 
-local function restorer(text) return replace({ {";", ","} })(text, 1) end -- and back to commas
+local function restorer(text) return replace({ {";", ","}, })(text, 1) end -- and back to commas 
 
 local function partition(pattern) -- iterator factory
   return function(text) -- make iterator for partitioning pattern in text
@@ -56,7 +53,7 @@ end
 
 local function restore(text) -- make table of restored parts (no partition of container)
   local parts = {}; for part in partition("([^,]-),")(text) do -- break into parts of text ending in commas
-    parts[#parts + 1] = restorer(part) -- any semicolons back to commas for each part
+    parts[#parts + 1] = restorer(part) -- any semicolons and bangs back to commas for each part
   end; return parts
 end
 
@@ -131,7 +128,7 @@ function dictionary(text, line)
 end
 
 function groupContainer(text, line) 
-  local insideGroup = string.gsub(text, "%((.-)%)", "%1")
+  local insideGroup = string.match(text, "%((.-)%)")
   local groupEntry = makeEntry(insideGroup, line)
   return tag(text, "%b()").."("..groupEntry..")" -- ..optional(text)
 end
@@ -146,9 +143,10 @@ end
 function funContainer(text, line) -- leaky returns, use group to contain funContainer
   local argsPart, returnsPart = string.match(text, "(%b()):(.-)$")
   local strippedReturns = stripOther(returnsPart, 1) 
-  local argsEntry = makeEntry(argsPart, line)
+  local insideArgs = string.match(text, "%((.-)%)")
+  local argsEntry = makeEntry(insideArgs, line)
   local returnsEntry = makeEntry(strippedReturns, line)
-  local funEntry = "fun"..argsEntry..": "..returnsEntry
+  local funEntry = "fun("..argsEntry.."): "..returnsEntry
   return funEntry
 end
 
@@ -163,15 +161,15 @@ local finders = { -- **Ordered most carefully; matchID string for debug**
 
   {"({:})", tableToken,  "tableToken"}, {"(%(:%))", functionToken, "functionToken"}, {"(%[:%])", array, "arrayToken"},
 
-  {"|", union, "union"},
-
-  {"(%b():.-$)", funContainer, "funContainer"},  
+  {"%b():.-$", funContainer, "funContainer"},  
   {"(%b{})", literalsContainer, "literalsContainer"}, 
   {"(%b[]):", dictionary, "dictionary"}, 
   {"(%b[])", tupleContainer, "tupleContainer"},
   {"(%b())", groupContainer, "groupContainer"}, 
 
   {"(.+%[%])", array, "array"}, -- [] can't stand alone, use [:]
+
+  {"|", union, "union"}, -- make sure we don't find inside container instead of container
 
   {"(#:)", numberToken, "numberToken"},   {'(":")', stringToken, "stringToken"}, 
   {"(%^:)", booleanToken, "booleanToken"}, {"(@:)", userdataToken, "userdataToken"}, 
@@ -241,7 +239,7 @@ end
 
 local doChild = {["function"] = makeFunction, ["value"] = makeType} -- api has bracketed names
 
-function signfiles.test(libChildEntry) verbose = false; return doChild[libChildEntry.type](libChildEntry) end
+function signfiles.test(libChildEntry) verbose = true; return doChild[libChildEntry.type](libChildEntry) end
 
 local function writeLines (outLines, outFile, outName, verbose) 
   for _, line in ipairs(outLines) do outFile:write(line, "\n") end 
