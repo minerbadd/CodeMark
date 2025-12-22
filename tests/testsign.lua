@@ -12,15 +12,61 @@ local CodeMark =  table.concat(files, "/", 1, #files - 1).."/"
 local signfiles = dofile(CodeMark.."signfiles.lua")
 
 local testData = {
+  
+  {
+  ["returns"] = " `[distance: #:, name: \":\", label: \":\", cardinal: \":\", :xyzf:] <-",
+  ["args"] = ":xyzf:?, :cardinals:",
+  ["type"] = "function",
+  ["name"] = "place.nearby",
+  ["description"] = "Sorted",
+  },
+  
+  {
+  ["returns"] = " `\":\"` <-",
+  ["args"] = "thePlan: \":\", parameters: [nearPlace: \":\", farPlace: \":\", filling: \":\", target: \":\"?]",
+  ["type"] = "function",
+  ["name"] = "_field.fillTill",
+  ["description"] = "To `put``.",
+},
+  
+  {
+  ["returns"] = " (`:): nil &!recovery` <-",
+  ["args"] = ":xyzf:, situation:situation?",
+  ["type"] = "function",
+  ["name"] = "step.to",
+  ["description"] = "Step to position from (current) sItuation. Iterate first in x direction to completion, then z, and finally y. Once complete, each iterator is exhausted. Finally turn to face if supplied. Returned iterator returns_ `nil` _when iterators for all directions are exhausted.",
+},
+  
+  {
+  ["returns"] = " `(:): nil &!recovery` <-",
+  ["args"] = ":xyzf:, situation:situation?",
+  ["type"] = "function",
+  ["name"] = "step.to",
+  ["description"] = "Step to position from (current) sItuation. Iterate first in x direction to completion, then z, and finally y. Once complete, each iterator is exhausted. Finally turn to face if supplied. Returned iterator returns_ `nil` _when iterators for all directions are exhausted.",
+},
 
+  {
+    ["returns"] = " `any` <-",
+    ["args"] = "op: (:), initial: any, table: {:}",
+    ["type"] = "function",
+    ["name"] = "core.reduce",
+    ["description"] = "Fold `table` _to produce_ `result` _by applying_ `op` _to_ `table",
+  },
 
+  {
+    ["returns"] = " `{:}|any` <-",
+    ["args"] = "source: {:}|any",
+    ["type"] = "function",
+    ["name"] = "core.clone",
+    ["description"] = "Deep copy source table or return source if not table.",
+  },
   {
     ["type"] = "value",
     ["returns"] = " `xyz[] | [core.faces]: xyz`",
     ["name"] = "xyzMap",
     ["description"] = "Table of vectors either an array or dictionary",
   },
-  
+
   {
     ["type"] = "value",
     ["returns"] = " {start: \":\"[], odd: \":\"[], even: \":\"[], last: \":\"[]}`",
@@ -33,6 +79,14 @@ local testData = {
     ["returns"] = " (markerName: \":\", :bores:):  `marking[]`",
     ["name"] = "mine.post",
     ["description"] = "Navigate shaft and bores to go to marker.",
+  },
+
+  {
+    ["returns"] = " `closing` <-",
+    ["args"] = "table: {:}?, key: \":\"?  ",
+    ["type"] = "function",
+    ["name"] = "core.state",
+    ["description"] = "Returns closure over closure variable",
   },
 
   {
@@ -259,13 +313,6 @@ local testData = {
     ["type"] = "function",
     ["name"] = "core.inext",
     ["description"] = "Iterator over table beginning at index.",
-  },
-  {
-    ["returns"] = " `closing` <-",
-    ["args"] = "table: {:}?, key: \":\"?  ",
-    ["type"] = "function",
-    ["name"] = "core.state",
-    ["description"] = "Returns closure over closure variable",
   },
 
   {

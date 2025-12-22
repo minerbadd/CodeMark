@@ -89,7 +89,7 @@ CodeMark annotations are more concise than those of LLS and more descriptive. Bu
 
 Annotations may be grouped with parentheses, `()`. They may be combined as a union of types as `|`. They may be marked with a `?` suffix to indicate that a value may be `nil`.
 
-Functions, are annotated as `(:)` or `():`. The first case types a value as a `function` with no other information provided. The second allows for named and typed parameters as well as typed (and optionally named) return values. Here's a simple example:
+Functions, are annotated as `():`. The annotation allows for (but does not require) named and typed parameters as well as typed (and optionally named) return values. Here's a simple example:
 
 `--:: move.track(enable: ^:)` -> _Set tracking condition_ -> `enable: ^:`
 

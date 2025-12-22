@@ -1,6 +1,6 @@
 
-local line =  " ():(value: any): value: any"
-local inside = string.match(line, "%b():.-$") 
+local line = "(op: (:), initial: any, table: {:})"
+local inside = string.match(line, "%((.-)%)$" )
 print(inside)
 
 -- print(line, found)

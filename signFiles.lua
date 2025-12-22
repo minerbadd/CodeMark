@@ -18,7 +18,6 @@ local function stripNewLine(text) return string.gsub(text, "\n(.+)", "%1") end
 
 -- **Partition Text Keeping Containers Whole** (by hiding commas and pipes)
 
-local containers = { "%b[]", "%b()", "%b{}",}
 
 local function replace(patterns) -- generate function to replace patterns for gsub
   local function replacing(text, index)
@@ -30,10 +29,12 @@ end
 
 local function hider(text) return replace({ {",", ";"}, })(text, 1) end -- specialize replacer
 
-local function hide(text) -- commas to semicolons inside container 
-  for _, container in ipairs(containers) do local found = string.match(text, container) 
-    if found and found ~= "[]" then return string.gsub(text, container, hider) end -- apply hider to targets in text
-  end; return text -- not a container: no need for hiding commas 
+local containers = { "%b():", "%b[]", "%b()", "%b{}",}
+
+local function hide(text, index) -- commas to semicolons inside container 
+  if index > #containers then return text end 
+  local hidden = string.gsub(text, containers[index], hider)
+  return hide(hidden, index + 1)  -- rebind new string in recursion
 end
 
 local function restorer(text) return replace({ {";", ","}, })(text, 1) end -- and back to commas 
@@ -143,7 +144,7 @@ end
 function funContainer(text, line) -- leaky returns, use group to contain funContainer
   local argsPart, returnsPart = string.match(text, "(%b()):(.-)$")
   local strippedReturns = stripOther(returnsPart, 1) 
-  local insideArgs = string.match(argsPart, "%((.-)%)")
+  local insideArgs = string.match(argsPart, "%((.-)%)$")
   local argsEntry = makeEntry(insideArgs, line)
   local returnsEntry = makeEntry(strippedReturns, line)
   local funEntry = "fun("..argsEntry.."): "..returnsEntry
@@ -159,17 +160,17 @@ end
 
 local finders = { -- **Ordered most carefully; matchID string for debug**
 
-  {"({:})", tableToken,  "tableToken"}, {"(%(:%))", functionToken, "functionToken"}, {"(%[:%])", array, "arrayToken"},
-
-  {"%b():.-$", funContainer, "funContainer"},  
-  {"(%b{})", literalsContainer, "literalsContainer"}, 
-  {"(%b[]):", dictionary, "dictionary"}, 
-  {"(%b[])", tupleContainer, "tupleContainer"},
-  {"(%b())", groupContainer, "groupContainer"}, 
-
+  {"%b():.-$", funContainer, "funContainer", },  
+  {"(%b{})", literalsContainer, "literalsContainer", {["{:}"] = true} }, 
+  {"(%b[]):", dictionary, "dictionary",}, 
+  {"(%b[])", tupleContainer, "tupleContainer",  {["[]"] = true, ["[:]"] = true} },
+  {"(%b())", groupContainer, "groupContainer", {["(:)"] = true} },
   {"(.+%[%])", array, "array"}, -- [] can't stand alone, use [:]
 
-  {"|", union, "union"}, -- make sure we don't find inside container instead of container
+  {"|", union, "union"},
+
+
+  {"(%[:%])", array, "arrayToken"},  {"({:})", tableToken,  "tableToken"}, {"(%(:%))", functionToken, "functionToken"}, 
 
   {"(#:)", numberToken, "numberToken"},   {'(":")', stringToken, "stringToken"}, 
   {"(%^:)", booleanToken, "booleanToken"}, {"(@:)", userdataToken, "userdataToken"}, 
@@ -177,22 +178,22 @@ local finders = { -- **Ordered most carefully; matchID string for debug**
 
   {":([%a%d%.]-):", typeTwiceToken, "typeTwiceToken"}, 
   {":%s-([%w%.]+)", typeTaggedToken, "typeTaggedToken"}, 
-  {"([%w%.%s]*)", typeToken, "typeToken"}
+  {"([%w%.%s]*)", typeToken, "typeToken"},
 }
 -- **Match Elements Iterator to Make Entries**
 
 local function findMatch(part) -- for part
   for _, finder in ipairs(finders) do
-    local pattern, handler, matchID = table.unpack(finder)
+    local pattern, handler, matchID, excludes = table.unpack(finder)
     local found = string.match(part, pattern)
-    if found and found ~= "[]" then 
+    if found and (not excludes or not excludes[found]) then 
       return handler, matchID 
     end
   end
 end
 
 local function elements(text) -- iterator
-  local index, parts = 1, restore(hide(text))
+  local index, parts = 1, restore(hide(text, 1))
   return function() 
     if index > #parts then return end-- terminate iterator
     local part = parts[index]; local handler, matchID = findMatch(part); index = index + 1 
@@ -218,11 +219,12 @@ end
 
 local function makeFunction(functionAPI)
   local line = functionAPI.name.."("..functionAPI.args.."): "..functionAPI.returns
-  local args = makeEntry(stripOther(functionAPI.args, 1), line)  -- a string
-  local returns = makeEntry(stripOther(functionAPI.returns, 1), line)
+  local args = stripOther(functionAPI.args, 1)
+  local returns = stripOther(functionAPI.returns, 1)
+  local entry = makeEntry("("..args.."):"..returns, line)
   if not functionAPI.description then print("No description in "..line) end
   local description = "\n-- "..stripNewLine(functionAPI.description or "")
-  local markLine, typeLine  = "-- "..line, "---@type fun("..args.."): "..(returns or "")
+  local markLine, typeLine  = "-- "..line, "---@type "..entry
   local functionLine = "function "..functionAPI.name.."() end"
   return description.."\n"..markLine.."\n"..typeLine.."\n"..functionLine
 end
@@ -232,7 +234,7 @@ local function makeType(typeAPI) --
   local supress = "---@diagnostic disable-next-line: duplicate-doc-alias"
   local qualified = string.find(name, "%.") and supress.."\n" or ""
   local returns =  makeEntry(stripOther(typeAPI.returns, 1), line)
-  if not typeAPI.description then print("No description in "..line) end
+  if not typeAPI.description then print("ERROR: no description in "..line) end
   local description = stripNewLine(typeAPI.description or "")
   return "\n-- "..line.."\n"..qualified.."---@alias "..name.." "..returns.." # "..description.."\n"
 end
