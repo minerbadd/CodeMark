@@ -14,36 +14,54 @@ local signfiles = dofile(CodeMark.."signfiles.lua")
 local testData = {
   
   {
-  ["returns"] = " `[distance: #:, name: \":\", label: \":\", cardinal: \":\", :xyzf:] <-",
-  ["args"] = ":xyzf:?, :cardinals:",
-  ["type"] = "function",
-  ["name"] = "place.nearby",
-  ["description"] = "Sorted",
+    ["returns"] = " `{part:():, close:():}` <-",
+    ["args"] = "theTestSetTablePath:\":\", theTestSetName:\":\", theTestName:\":\"",
+    ["type"] = "function",
+    ["name"] = "check.open",
+    ["description"] = "Return object(closure)",
+  },
+ 
+  
+  {
+    ["returns"] = " `closing` <-",
+    ["args"] = "table: {:}?, key: \":\"?  ",
+    ["type"] = "function",
+    ["name"] = "core.state",
+    ["description"] = "Returns closure over closure variable",
   },
   
-  {
-  ["returns"] = " `\":\"` <-",
-  ["args"] = "thePlan: \":\", parameters: [nearPlace: \":\", farPlace: \":\", filling: \":\", target: \":\"?]",
-  ["type"] = "function",
-  ["name"] = "_field.fillTill",
-  ["description"] = "To `put``.",
-},
   
   {
-  ["returns"] = " (`:): nil &!recovery` <-",
-  ["args"] = ":xyzf:, situation:situation?",
-  ["type"] = "function",
-  ["name"] = "step.to",
-  ["description"] = "Step to position from (current) sItuation. Iterate first in x direction to completion, then z, and finally y. Once complete, each iterator is exhausted. Finally turn to face if supplied. Returned iterator returns_ `nil` _when iterators for all directions are exhausted.",
-},
-  
+    ["returns"] = " `[distance: #:, name: \":\", label: \":\", cardinal: \":\", :xyzf:] <-",
+    ["args"] = ":xyzf:?, :cardinals:",
+    ["type"] = "function",
+    ["name"] = "place.nearby",
+    ["description"] = "Sorted",
+  },
+
   {
-  ["returns"] = " `(:): nil &!recovery` <-",
-  ["args"] = ":xyzf:, situation:situation?",
-  ["type"] = "function",
-  ["name"] = "step.to",
-  ["description"] = "Step to position from (current) sItuation. Iterate first in x direction to completion, then z, and finally y. Once complete, each iterator is exhausted. Finally turn to face if supplied. Returned iterator returns_ `nil` _when iterators for all directions are exhausted.",
-},
+    ["returns"] = " `\":\"` <-",
+    ["args"] = "thePlan: \":\", parameters: [nearPlace: \":\", farPlace: \":\", filling: \":\", target: \":\"?]",
+    ["type"] = "function",
+    ["name"] = "_field.fillTill",
+    ["description"] = "To `put``.",
+  },
+
+  {
+    ["returns"] = " (`:): nil &!recovery` <-",
+    ["args"] = ":xyzf:, situation:situation?",
+    ["type"] = "function",
+    ["name"] = "step.to",
+    ["description"] = "Step to position from (current) sItuation. Iterate first in x direction to completion, then z, and finally y. Once complete, each iterator is exhausted. Finally turn to face if supplied. Returned iterator returns_ `nil` _when iterators for all directions are exhausted.",
+  },
+
+  {
+    ["returns"] = " `(:): nil &!recovery` <-",
+    ["args"] = ":xyzf:, situation:situation?",
+    ["type"] = "function",
+    ["name"] = "step.to",
+    ["description"] = "Step to position from (current) sItuation. Iterate first in x direction to completion, then z, and finally y. Once complete, each iterator is exhausted. Finally turn to face if supplied. Returned iterator returns_ `nil` _when iterators for all directions are exhausted.",
+  },
 
   {
     ["returns"] = " `any` <-",
@@ -81,13 +99,7 @@ local testData = {
     ["description"] = "Navigate shaft and bores to go to marker.",
   },
 
-  {
-    ["returns"] = " `closing` <-",
-    ["args"] = "table: {:}?, key: \":\"?  ",
-    ["type"] = "function",
-    ["name"] = "core.state",
-    ["description"] = "Returns closure over closure variable",
-  },
+
 
   {
     ["returns"] = " `^:, \":\", #: &:` <-",

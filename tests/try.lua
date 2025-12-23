@@ -1,7 +1,8 @@
 
-local line = "(op: (:), initial: any, table: {:})"
-local inside = string.match(line, "%((.-)%)$" )
-print(inside)
+local line = "{part:():, close:(): }"
+local bs, be = string.find(line, "(%b{})" )
+
+print(bs == 1, be == #line)
 
 -- print(line, found)
 --[[
@@ -13,3 +14,5 @@ local found2 = string.find(part2, pattern)
 print(part1, pattern, found1)
 print(part2, pattern, found2)
 --]]
+
+--"(theTestSetTablePath:\":\", theTestSetName:\":\", theTestName:\":\"): {part:():, close:():} "

@@ -12,7 +12,7 @@ local function stripOther(text, index)
   return stripOther(stripped, index + 1)
 end
 
---local function stripSpaces(text) return string.gsub(text, "%s*(%w-)%s*", "%1") end
+local function stripSpaces(text) return string.gsub(text, "%s*(%w-)%s*", "%1") end
 
 local function stripNewLine(text) return string.gsub(text, "\n(.+)", "%1") end
 
@@ -29,7 +29,7 @@ end
 
 local function hider(text) return replace({ {",", ";"}, })(text, 1) end -- specialize replacer
 
-local containers = { "%b():", "%b[]", "%b()", "%b{}",}
+local containers = { "%b{}", "%b():", "%b[]", "%b()", }
 
 local function hide(text, index) -- commas to semicolons inside container 
   if index > #containers then return text end 
@@ -55,14 +55,15 @@ end
 local function restore(text) -- make table of restored parts (no partition of container)
   local parts = {}; for part in partition("([^,]-),")(text) do -- break into parts of text ending in commas
     parts[#parts + 1] = restorer(part) -- any semicolons and bangs back to commas for each part
-  end; return parts
+  end; 
+  return parts
 end
 
 local function stripTag(text) 
   local parts, stripped  = restore(text), {}
-  for _, part in ipairs(parts) do 
-    local match = string.match(part, "[_%w]-:(.*)$")
-    stripped[#stripped + 1] =  match or part 
+  for _, part in ipairs(parts) do
+    local untagged = string.gsub(part, "([%(]?)[_%w]-:(.-)", "%1%2")
+    stripped[#stripped + 1] =  untagged 
   end
   return table.concat(stripped, ", ")
 end
@@ -71,7 +72,7 @@ end
 
 local function tableToken(text) return string.gsub(text, "{:}", "table") end
 
-local function functionToken(text) return string.gsub(text, "%(:%)", "function") end
+local function functionToken(text) return string.gsub(text, "%(%):", "function") end
 
 local function stringToken(text) return string.gsub(text, '":"', "string") end
 
@@ -158,20 +159,18 @@ function literalsContainer(text, line)
   return tag(text, "%b{}")..literalsEntry -- e.g. "{tag1: string, tag2: xyz}"
 end
 
-local finders = { -- **Ordered most carefully; matchID string for debug**
-
-  {"%b():.-$", funContainer, "funContainer", },  
-  {"(%b{})", literalsContainer, "literalsContainer", {["{:}"] = true} }, 
-  {"(%b[]):", dictionary, "dictionary",}, 
-  {"(%b[])", tupleContainer, "tupleContainer",  {["[]"] = true, ["[:]"] = true} },
-  {"(%b())", groupContainer, "groupContainer", {["(:)"] = true} },
+local finders = { -- **Ordered most carefully; matchID string for debug**.. pattern, handler, exclusions, container
+  
+  {"%b():.-$", funContainer, "funContainer", {["():"] = true}, true },  -- true to indicate container
+  {"(%b{})", literalsContainer, "literalsContainer", {["{:}"] = true}, true}, 
+  {"(%b[]):", dictionary, "dictionary"}, 
+  {"(%b[])", tupleContainer, "tupleContainer",  {["[]"] = true, ["[:]"] = true}, true},
+  {"(%b())", groupContainer, "groupContainer", {},  true}, -- {["(:)"] = true},
   {"(.+%[%])", array, "array"}, -- [] can't stand alone, use [:]
 
   {"|", union, "union"},
 
-
-  {"(%[:%])", array, "arrayToken"},  {"({:})", tableToken,  "tableToken"}, {"(%(:%))", functionToken, "functionToken"}, 
-
+  {"(%[:%])", array, "arrayToken"},  {"({:})", tableToken,  "tableToken"}, {"(%(%):)", functionToken, "functionToken"}, 
   {"(#:)", numberToken, "numberToken"},   {'(":")', stringToken, "stringToken"}, 
   {"(%^:)", booleanToken, "booleanToken"}, {"(@:)", userdataToken, "userdataToken"}, 
   {"(_:)", placeToken, "placeToken"}, {"nil", nilToken, "nilToken"},  {"any", anyToken, "anyToken"},
@@ -182,21 +181,23 @@ local finders = { -- **Ordered most carefully; matchID string for debug**
 }
 -- **Match Elements Iterator to Make Entries**
 
-local function findMatch(part) -- for part
+local function findMatch(part, text) -- for part
+  local stripped = stripSpaces(part)
   for _, finder in ipairs(finders) do
-    local pattern, handler, matchID, excludes = table.unpack(finder)
-    local found = string.match(part, pattern)
-    if found and (not excludes or not excludes[found]) then 
-      return handler, matchID 
-    end
-  end
+    local pattern, handler, matchID, exclusions, container = table.unpack(finder)
+    local found = string.match(stripped, pattern)
+    local start, ending  = string.find(stripped, pattern)
+    local outer = start == 1 and ending == #stripped
+    local exceptions = (container and not outer) or (exclusions and exclusions[found])
+    if found and not exceptions then return handler, matchID end
+  end; error("can't find match for "..stripped.."in "..text)
 end
 
 local function elements(text) -- iterator
   local index, parts = 1, restore(hide(text, 1))
   return function() 
     if index > #parts then return end-- terminate iterator
-    local part = parts[index]; local handler, matchID = findMatch(part); index = index + 1 
+    local part = parts[index]; local handler, matchID = findMatch(part, text); index = index + 1 
     return part, handler, matchID
   end
 end
