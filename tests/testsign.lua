@@ -14,6 +14,14 @@ local signfiles = dofile(CodeMark.."signfiles.lua")
 local testData = {
   
   {
+    ["returns"] = " `\":\"` <-",
+    ["args"] = "thePlan: \":\", parameters: [nearPlace: \":\", farPlace: \":\", filling: \":\", target: \":\"?]",
+    ["type"] = "function",
+    ["name"] = "_field.fillTill",
+    ["description"] = "To `put``.",
+  },
+  
+  {
     ["returns"] = " `{part:():, close:():}` <-",
     ["args"] = "theTestSetTablePath:\":\", theTestSetName:\":\", theTestName:\":\"",
     ["type"] = "function",
@@ -37,14 +45,6 @@ local testData = {
     ["type"] = "function",
     ["name"] = "place.nearby",
     ["description"] = "Sorted",
-  },
-
-  {
-    ["returns"] = " `\":\"` <-",
-    ["args"] = "thePlan: \":\", parameters: [nearPlace: \":\", farPlace: \":\", filling: \":\", target: \":\"?]",
-    ["type"] = "function",
-    ["name"] = "_field.fillTill",
-    ["description"] = "To `put``.",
   },
 
   {

@@ -41,6 +41,9 @@ local function restorer(text) return replace({ {";", ","}, })(text, 1) end -- an
 
 local function partition(pattern) -- iterator factory
   return function(text) -- make iterator for partitioning pattern in text
+    if not text then
+      error("no text")
+    end
     local position, length = 1, string.len(text)
     return function() -- iterator on text pattern handles single and last parts
       if position > length then return end -- terminate iterator
@@ -62,8 +65,10 @@ end
 local function stripTag(text) 
   local parts, stripped  = restore(text), {}
   for _, part in ipairs(parts) do
-    local untagged = string.gsub(part, "([%(]?)[_%w]-:(.-)", "%1%2")
-    stripped[#stripped + 1] =  untagged 
+    local funProtect = string.gsub(part, "%):", "%)|") -- hack
+    local untagged = string.gsub(funProtect, "([%(]?)[_%w]*:(.-)$", "%1%2")
+    local funRestore = string.gsub(untagged, "%)|", "%):")
+    stripped[#stripped + 1] =  funRestore 
   end
   return table.concat(stripped, ", ")
 end
@@ -160,7 +165,7 @@ function literalsContainer(text, line)
 end
 
 local finders = { -- **Ordered most carefully; matchID string for debug**.. pattern, handler, exclusions, container
-  
+
   {"%b():.-$", funContainer, "funContainer", {["():"] = true}, true },  -- true to indicate container
   {"(%b{})", literalsContainer, "literalsContainer", {["{:}"] = true}, true}, 
   {"(%b[]):", dictionary, "dictionary"}, 
@@ -182,15 +187,17 @@ local finders = { -- **Ordered most carefully; matchID string for debug**.. patt
 -- **Match Elements Iterator to Make Entries**
 
 local function findMatch(part, text) -- for part
-  local stripped = stripSpaces(part)
+  local noSpaces = stripSpaces(part)
   for _, finder in ipairs(finders) do
     local pattern, handler, matchID, exclusions, container = table.unpack(finder)
-    local found = string.match(stripped, pattern)
-    local start, ending  = string.find(stripped, pattern)
-    local outer = start == 1 and ending == #stripped
-    local exceptions = (container and not outer) or (exclusions and exclusions[found])
-    if found and not exceptions then return handler, matchID end
-  end; error("can't find match for "..stripped.."in "..text)
+    local found = string.match(noSpaces, pattern)
+    if found then local noTags = stripTag(found)
+      local start, ending  = string.find(noTags, pattern)
+      local outer = start == 1 and ending == #noTags
+      local exceptions = (container and not outer) or (exclusions and exclusions[found])
+      if not exceptions then return handler, matchID end
+    end
+  end; error("can't find match for "..part.."in "..text)
 end
 
 local function elements(text) -- iterator
