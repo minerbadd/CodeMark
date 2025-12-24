@@ -170,12 +170,13 @@ local finders = { -- **Ordered most carefully; matchID string for debug**.. patt
   {"(%b{})", literalsContainer, "literalsContainer", {["{:}"] = true}, true}, 
   {"(%b[]):", dictionary, "dictionary"}, 
   {"(%b[])", tupleContainer, "tupleContainer",  {["[]"] = true, ["[:]"] = true}, true},
-  {"(%b())", groupContainer, "groupContainer", {},  true}, -- {["(:)"] = true},
+  {"(%(%):)", functionToken, "functionToken"}, --??
+  {"(%b())", groupContainer, "groupContainer",  {["():"] = true},  true}, 
   {"(.+%[%])", array, "array"}, -- [] can't stand alone, use [:]
 
   {"|", union, "union"},
 
-  {"(%[:%])", array, "arrayToken"},  {"({:})", tableToken,  "tableToken"}, {"(%(%):)", functionToken, "functionToken"}, 
+  {"(%[:%])", array, "arrayToken"},  {"({:})", tableToken,  "tableToken"}, 
   {"(#:)", numberToken, "numberToken"},   {'(":")', stringToken, "stringToken"}, 
   {"(%^:)", booleanToken, "booleanToken"}, {"(@:)", userdataToken, "userdataToken"}, 
   {"(_:)", placeToken, "placeToken"}, {"nil", nilToken, "nilToken"},  {"any", anyToken, "anyToken"},

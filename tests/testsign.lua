@@ -14,6 +14,14 @@ local signfiles = dofile(CodeMark.."signfiles.lua")
 local testData = {
   
   {
+    ["returns"] = " `any` <-",
+    ["args"] = "op: ():, initial: any, table: {:}",
+    ["type"] = "function",
+    ["name"] = "core.reduce",
+    ["description"] = "Fold `table` _to produce_ `result` _by applying_ `op` _to_ `table",
+  },
+  
+  {
     ["returns"] = " `\":\"` <-",
     ["args"] = "thePlan: \":\", parameters: [nearPlace: \":\", farPlace: \":\", filling: \":\", target: \":\"?]",
     ["type"] = "function",
@@ -61,14 +69,6 @@ local testData = {
     ["type"] = "function",
     ["name"] = "step.to",
     ["description"] = "Step to position from (current) sItuation. Iterate first in x direction to completion, then z, and finally y. Once complete, each iterator is exhausted. Finally turn to face if supplied. Returned iterator returns_ `nil` _when iterators for all directions are exhausted.",
-  },
-
-  {
-    ["returns"] = " `any` <-",
-    ["args"] = "op: (:), initial: any, table: {:}",
-    ["type"] = "function",
-    ["name"] = "core.reduce",
-    ["description"] = "Fold `table` _to produce_ `result` _by applying_ `op` _to_ `table",
   },
 
   {
