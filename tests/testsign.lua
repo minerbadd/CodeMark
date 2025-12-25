@@ -14,6 +14,51 @@ local signfiles = dofile(CodeMark.."signfiles.lua")
 local testData = {
   
   {
+  ["type"] = "value",
+  ["returns"] = " `[direction]: (text: \":\"?): ^:, \":\"?`",
+  ["name"] = "turtle.puts",
+  ["description"] = "Attempt placing block of the selected slot in direction.",
+},
+  
+  {
+  ["type"] = "value",
+  ["returns"] = " `[direction]: (): `^:`, `detail?`",
+  ["name"] = "turtle.inspects",
+  ["description"] = "If true, get detail block information in direction.",
+},
+  
+  {
+  ["returns"] = " `nil` <-",
+  ["args"] = "template: {name: \":\", offset: xyz}, base: \":\", label: \":\", top: #:",
+  ["type"] = "function",
+  ["name"] = "map.locations",
+  ["description"] = "Add points offset from base. Add labelled points using template names and offsets from named base point or top for y-axis.",
+},
+  
+   {
+    ["returns"] = " `{part:():, close:():}` <-",
+    ["args"] = "theTestSetTablePath:\":\", theTestSetName:\":\", theTestName:\":\"",
+    ["type"] = "function",
+    ["name"] = "check.open",
+    ["description"] = "Return object(closure)",
+  },
+  
+  {
+    ["type"] = "value",
+    ["returns"] = " `xyz[] | [core.faces]: xyz`",
+    ["name"] = "xyzMap",
+    ["description"] = "Table of vectors either an array or dictionary",
+  },
+  
+  {
+    ["returns"] = " `{part:():, close:():}` <-",
+    ["args"] = "theTestSetTablePath:\":\", theTestSetName:\":\", theTestName:\":\"",
+    ["type"] = "function",
+    ["name"] = "check.open",
+    ["description"] = "Return object(closure)",
+  },
+  
+  {
     ["returns"] = " `any` <-",
     ["args"] = "op: ():, initial: any, table: {:}",
     ["type"] = "function",
@@ -28,16 +73,7 @@ local testData = {
     ["name"] = "_field.fillTill",
     ["description"] = "To `put``.",
   },
-  
-  {
-    ["returns"] = " `{part:():, close:():}` <-",
-    ["args"] = "theTestSetTablePath:\":\", theTestSetName:\":\", theTestName:\":\"",
-    ["type"] = "function",
-    ["name"] = "check.open",
-    ["description"] = "Return object(closure)",
-  },
- 
-  
+    
   {
     ["returns"] = " `closing` <-",
     ["args"] = "table: {:}?, key: \":\"?  ",

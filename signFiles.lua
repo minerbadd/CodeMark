@@ -66,9 +66,11 @@ local function stripTag(text)
   local parts, stripped  = restore(text), {}
   for _, part in ipairs(parts) do
     local funProtect = string.gsub(part, "%):", "%)|") -- hack
-    local untagged = string.gsub(funProtect, "([%(]?)[_%w]*:(.-)$", "%1%2")
+    local dictProtect = string.gsub(funProtect, "%]:", "%]|") -- hack
+    local untagged = string.gsub(dictProtect, "([%(]?)[_%w]*:(.-)$", "%1%2")
     local funRestore = string.gsub(untagged, "%)|", "%):")
-    stripped[#stripped + 1] =  funRestore 
+    local dictRestore = string.gsub(funRestore, "%]|", "%]:")
+    stripped[#stripped + 1] = dictRestore 
   end
   return table.concat(stripped, ", ")
 end
@@ -76,8 +78,6 @@ end
 -- **Handlers to Replace Tokens in Elements with LLS Words.**
 
 local function tableToken(text) return string.gsub(text, "{:}", "table") end
-
-local function functionToken(text) return string.gsub(text, "%(%):", "function") end
 
 local function stringToken(text) return string.gsub(text, '":"', "string") end
 
@@ -101,7 +101,7 @@ local function typeToken(text) return text end
 
 -- **Container Handlers: Make LLS entries of elements which may be or may be in containers.**
 
-local makeEntry, union, array, dictionary, groupContainer, funContainer, tupleContainer, literalsContainer -- mutual recursions
+local makeEntry, union, array, dictionary, groupContainer, funContainer, funToken, tupleContainer, literalsContainer -- mutual recursions
 
 function union(text, line)
   local beforeText, afterText = string.match(text, "(.-)|(.*)")
@@ -147,6 +147,13 @@ function tupleContainer(text, line)
   return tag(text, "%b[]").."["..stripped.."]" -- ..optional(text) 
 end
 
+function funToken(text, line)
+  local returnsToken = string.match(text,  "%(%):(.-)$")
+  local returnsEntry =  makeEntry(returnsToken, line)
+  local tokenEntry = "fun( ):"..returnsEntry
+  return tokenEntry
+end
+
 function funContainer(text, line) -- leaky returns, use group to contain funContainer
   local argsPart, returnsPart = string.match(text, "(%b()):(.-)$")
   local strippedReturns = stripOther(returnsPart, 1) 
@@ -165,17 +172,17 @@ function literalsContainer(text, line)
 end
 
 local finders = { -- **Ordered most carefully; matchID string for debug**.. pattern, handler, exclusions, container
-
-  {"%b():.-$", funContainer, "funContainer", {["():"] = true}, true },  -- true to indicate container
+  {"(%b():).-$", funContainer, "funContainer", {["():"] = true}, true },  -- true to indicate container
   {"(%b{})", literalsContainer, "literalsContainer", {["{:}"] = true}, true}, 
-  {"(%b[]):", dictionary, "dictionary"}, 
+  {"(%b[]:).-$", dictionary, "dictionary"}, 
   {"(%b[])", tupleContainer, "tupleContainer",  {["[]"] = true, ["[:]"] = true}, true},
-  {"(%(%):)", functionToken, "functionToken"}, --??
+  {"(%(%):).-$", funToken, "functionToken"}, 
   {"(%b())", groupContainer, "groupContainer",  {["():"] = true},  true}, 
   {"(.+%[%])", array, "array"}, -- [] can't stand alone, use [:]
 
   {"|", union, "union"},
 
+  {"(.+%[%])", array, "array"}, -- [] can't stand alone, use [:]
   {"(%[:%])", array, "arrayToken"},  {"({:})", tableToken,  "tableToken"}, 
   {"(#:)", numberToken, "numberToken"},   {'(":")', stringToken, "stringToken"}, 
   {"(%^:)", booleanToken, "booleanToken"}, {"(@:)", userdataToken, "userdataToken"}, 
@@ -203,7 +210,7 @@ end
 
 local function elements(text) -- iterator
   local index, parts = 1, restore(hide(text, 1))
-  return function() 
+  return function()  
     if index > #parts then return end-- terminate iterator
     local part = parts[index]; local handler, matchID = findMatch(part, text); index = index + 1 
     return part, handler, matchID
