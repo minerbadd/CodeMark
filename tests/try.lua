@@ -1,4 +1,22 @@
 
+
+local function partition(pattern) -- iterator factory
+  return function(text) -- make iterator for partitioning pattern in text
+    if not text then
+      error("no text")
+    end
+    local position, length = 1, string.len(text)
+    return function() -- iterator on text pattern handles single and last parts
+      if position > length then return end -- terminate iterator
+      local first, last = string.find(text, pattern, position)
+      local ending = (first and first < last) and last or length + 1
+      local current = position; position = ending + 1
+      return string.sub(text, current, ending - 1); -- partial string
+    end
+  end
+end 
+
+
 local line = "{part:():, close:(): }"
 local bs, be = string.find(line, "(%b{})" )
 

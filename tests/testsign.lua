@@ -13,6 +13,22 @@ local signfiles = dofile(CodeMark.."signfiles.lua")
 
 local testData = {
   
+   {
+    ["returns"] = " `{part:():, close:():}` <-",
+    ["args"] = "theTestSetTablePath:\":\", theTestSetName:\":\", theTestName:\":\"",
+    ["type"] = "function",
+    ["name"] = "check.open",
+    ["description"] = "Return object(closure)",
+  },
+  
+  {
+    ["returns"] = " `any` <-",
+    ["args"] = "op: ():, initial: any, table: {:}",
+    ["type"] = "function",
+    ["name"] = "core.reduce",
+    ["description"] = "Fold `table` _to produce_ `result` _by applying_ `op` _to_ `table",
+  },
+  
   {
   ["type"] = "value",
   ["returns"] = " `[direction]: (text: \":\"?): ^:, \":\"?`",
@@ -35,13 +51,7 @@ local testData = {
   ["description"] = "Add points offset from base. Add labelled points using template names and offsets from named base point or top for y-axis.",
 },
   
-   {
-    ["returns"] = " `{part:():, close:():}` <-",
-    ["args"] = "theTestSetTablePath:\":\", theTestSetName:\":\", theTestName:\":\"",
-    ["type"] = "function",
-    ["name"] = "check.open",
-    ["description"] = "Return object(closure)",
-  },
+  
   
   {
     ["type"] = "value",

@@ -149,8 +149,9 @@ end
 
 function funToken(text, line)
   local returnsToken = string.match(text,  "%(%):(.-)$")
-  local returnsEntry =  makeEntry(returnsToken, line)
-  local tokenEntry = "fun( ):"..returnsEntry
+  local returnsEmpty = returnsToken == "" or returnsToken == "?"
+  local returnsEntry = returnsEmpty and "function" or "fun():"..makeEntry(returnsToken, line)
+  local tokenEntry = tag(text, "%(%):")..returnsEntry
   return tokenEntry
 end
 
