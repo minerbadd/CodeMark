@@ -13,6 +13,14 @@ local signfiles = dofile(CodeMark.."signfiles.lua")
 
 local testData = {
   
+  {
+  ["returns"] = " `():` <-",
+  ["args"] = "completions: {:}",
+  ["type"] = "function",
+  ["name"] = "core.completer",
+  ["description"] = "Register command completions for shell",
+},
+  
    {
     ["returns"] = " `{part:():, close:():}` <-",
     ["args"] = "theTestSetTablePath:\":\", theTestSetName:\":\", theTestName:\":\"",
