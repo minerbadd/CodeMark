@@ -133,11 +133,16 @@ function groupContainer(text, line)
   return tag(text, "%b()").."("..groupEntry..")" -- ..optional(text)
 end
 
+local function tupleStrip(part)
+  local stripped = string.gsub(part, "[_%w]-:([%w|]*)", "%1")
+  return stripped
+end
+
 function tupleContainer(text, line) 
   local insideTable = string.match(text, "%[(.*)%]")
   local _, tableEntries = makeEntry(insideTable, line)
   local tableEntry = assemble(tableEntries)
-  local stripped = stripTag(tableEntry) -- need to strip off any tags in table entry
+  local stripped = tupleStrip(tableEntry) -- need to strip off any tags in table entry
   return tag(text, "%b[]").."["..stripped.."]" -- ..optional(text) 
 end
 

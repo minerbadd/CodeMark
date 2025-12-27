@@ -1,4 +1,12 @@
 
+local part = " op: string,  placeName: string,  borePlansFileOrLevels: string | number,  shaftPlansFile: string"
+local function tupleStrip(part)
+  local stripped = string.gsub(part, "[_%w]-:([%w|]*)", "%1")
+  return stripped
+end
+
+print(tupleStrip(part))
+--[[
 local function assembler(parts, result, index, piped)
   if index > #parts then return result end
   local part = parts[index]; local pipe = part == "|"
@@ -9,6 +17,8 @@ end
 
 local function assemble(text) return assembler(text, "", 1, false) end
 
-local text = {"(source: {:}|any): {:}", "|", "any ", "99"}
+local text = {"op: string", " placeName: string", " borePlansFileOrLevels: string", "|", "number", " shaftPlansFile: string"} 
+
 print(assemble(text))
 
+--]]
