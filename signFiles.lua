@@ -181,19 +181,6 @@ local finders = { -- **Ordered most carefully; matchID string for debug**.. patt
 }
 -- **Match Elements Iterator to Make Entries**
 
-local function stripTag(text) 
-  local parts, stripped  = restore(text), {}
-  for _, part in ipairs(parts) do
-    local funProtect = string.gsub(part, "%):", "%)|") -- hack
-    local dictProtect = string.gsub(funProtect, "%]:", "%]|") -- hack
-    local untagged = string.gsub(dictProtect, "([%(]?)[_%w]*:(.-)$", "%1%2")
-    local funRestore = string.gsub(untagged, "%)|", "%):")
-    local dictRestore = string.gsub(funRestore, "%]|", "%]:")
-    stripped[#stripped + 1] = dictRestore 
-  end
-  return table.concat(stripped, ", ")
-end
-
 local function contained(text, pattern, container)
   if not container then return true end
   local preface = string.match(text, "(.-)"..pattern)
@@ -206,11 +193,9 @@ local function findMatch(part, text) -- for part
   for _, finder in ipairs(finders) do
     local pattern, handler, matchID, exclusions, container = table.unpack(finder)
     local found = string.match(noSpaces, pattern)
-    if found then local noTags = stripTag(found)
-      local start, ending  = string.find(noTags, pattern)
-      local outer = start == 1 and ending == #noTags
-      local wrapped, preface = contained(found, pattern, container)
-      local exceptions = (container and not outer) or (exclusions and exclusions[found])
+    if found then 
+      local wrapped = contained(found, pattern, container)
+      local exceptions = not wrapped or (exclusions and exclusions[found])
       if not exceptions then return handler, matchID end
     end
   end; error("can't find match for "..part.."in "..text)
