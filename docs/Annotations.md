@@ -116,11 +116,11 @@ And here's how it's used:
 ```Lua
 function move.left(count) count = count or 1; return turn(turnLeft, count, "left", "move") end --:= move.moves:: move.left:
 ```
-There are ten of these sharing the common definition and generating type information specific to each of the functions all the same and slightly different. (As a detail, function definitions are in a separate CodeMark name space for copy operations. The extra colon `move.moves::` above references the function name space.)
+In one example application of CodeMark, there are ten of these sharing the common definition and generating type information specific to each of the functions all the same and slightly different. (As a detail, function definitions are in a separate CodeMark name space for copy operations. The extra colon `move.moves::` above references the function name space.)
 
 ## Type Annotations: Tables and Subtypes of Tables
 
-Tables are a critical building block for Lua scripts. A Lua table can be an _array_, a _dictionary_, or what LLS calls _table literals_. (The last are accessed using the dot notation as seen in the function names above.) Each has its own annotation. A table can also be typed as just a table with no other information as `{:}`, an array as `[:]`. pBut there's more. 
+Tables are a critical building block for Lua scripts. A Lua table can be an _array_, a _dictionary_, or what LLS calls _table literals_. (The last are accessed using the dot notation as seen in the function names above.) Each has its own annotation. A table can also be typed as just a table with no other information as `{:}`, an array as `[:]`. But there's more. 
 
 Tables as dictionaries and what LLS calls table literals are annotated as follows:
 
@@ -136,12 +136,12 @@ Lua tables can also be used as (implicityly indexed) arrays. Here's an example o
 
 Arrays with a fixed number of elements we'll call _tuples_. As for dictionary keys, CodeMark provides for labeling of tuple elements (stripped away for LLS):
 
-`--:> xyz:` _Minecraft coordinates: +x: east, +y: up, +z: south_ -> `:[x: #:, y: #:, z: #:]`
+`--:> xyz:` _Minecraft coordinates: +x: east, +y: up, +z: south_ -> `[x: #:, y: #:, z: #:]`
 
  Specific kinds of tables can be thought of as being a new type which is a subtype of tables as in the examples above. Here's another example. The following function has one argument, `targets`, an array of strings. It returns a `detail` or `nil`. A `detail` is a table accessed by table literals: `name`, `count`, and `damage`. Each of these is typed and described.
 
 `--:: core.findItems(targets: ":"[])` -> _Selects found slot._ -> `detail?`  
-`--:> detail:` _Defined by Computercraft_ -> `:[name: detail.name, count: detail.count, damage: detail.damage]`  
+`--:> detail:` _Defined by Computercraft_ -> `[name: detail.name, count: detail.count, damage: detail.damage]`  
 `--:> detail.name:` _Prepended by the mod name `"minecraft:"`._ -> `":"`  
 `--:> detail.count:` _Available in inventory_ -> `#:` 
 `--:> detail.damage:` _Distinguishing value_ -> `#:` 
@@ -168,7 +168,7 @@ The function takes a `bounds` table for its `start`, an addend, `addend: xyz` (w
 
 CodeMark provides the programs to generate project documentation and LLS library files:
 
-- `apiFiles` generates markdown summaries and the repository (used by ZBS and `signfiles`)
+- `apiFiles` generates markdown summaries and the project API repository (used by ZBS and `signfiles`)
 - `signFiles` generates LLS libraries, one for each source module, from the repository
 - `downFiles` generates HTML from summary files and the source modules themselves for each source module
 

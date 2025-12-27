@@ -18,7 +18,6 @@ local function stripNewLine(text) return string.gsub(text, "\n(.+)", "%1") end
 
 -- **Partition Text Keeping Containers Whole** (by hiding commas and pipes)
 
-
 local function replace(patterns) -- generate function to replace patterns for gsub
   local function replacing(text, index)
     if index > #patterns then return text end -- each new string gets bound by the recursion
@@ -57,19 +56,6 @@ end
 
 local function assemble(text) return assembler(text, "", 1, false) end
 
-local function stripTag(text) 
-  local parts, stripped  = restore(text), {}
-  for _, part in ipairs(parts) do
-    local funProtect = string.gsub(part, "%):", "%)|") -- hack
-    local dictProtect = string.gsub(funProtect, "%]:", "%]|") -- hack
-    local untagged = string.gsub(dictProtect, "([%(]?)[_%w]*:(.-)$", "%1%2")
-    local funRestore = string.gsub(untagged, "%)|", "%):")
-    local dictRestore = string.gsub(funRestore, "%]|", "%]:")
-    stripped[#stripped + 1] = dictRestore 
-  end
-  return table.concat(stripped, ", ")
-end
-
 -- **Handlers to Replace Tokens in Elements with LLS Words.**
 
 local function tableToken(text) return string.gsub(text, "{:}", "table") end
@@ -90,9 +76,7 @@ local function numberToken(text) return string.gsub(text, "#:", "number") end
 
 local function typeTwiceToken(text) return string.gsub(text, ":([_%a%d]-):", "%1: %1") end
 
-local function union(text) 
-  return text 
-end
+local function union(text) return text end
 
 local function typeTaggedToken(text) return text end 
 
@@ -194,10 +178,28 @@ local finders = { -- **Ordered most carefully; matchID string for debug**.. patt
   {":([%a%d%.]-):", typeTwiceToken, "typeTwiceToken"}, 
   {":%s-([%w%.]+)", typeTaggedToken, "typeTaggedToken"}, 
   {"([%w%.%s]*)", typeToken, "typeToken"},
-
-
 }
 -- **Match Elements Iterator to Make Entries**
+
+local function stripTag(text) 
+  local parts, stripped  = restore(text), {}
+  for _, part in ipairs(parts) do
+    local funProtect = string.gsub(part, "%):", "%)|") -- hack
+    local dictProtect = string.gsub(funProtect, "%]:", "%]|") -- hack
+    local untagged = string.gsub(dictProtect, "([%(]?)[_%w]*:(.-)$", "%1%2")
+    local funRestore = string.gsub(untagged, "%)|", "%):")
+    local dictRestore = string.gsub(funRestore, "%]|", "%]:")
+    stripped[#stripped + 1] = dictRestore 
+  end
+  return table.concat(stripped, ", ")
+end
+
+local function contained(text, pattern, container)
+  if not container then return true end
+  local preface = string.match(text, "(.-)"..pattern)
+  local contained = preface == ""
+  return contained, preface
+end
 
 local function findMatch(part, text) -- for part
   local noSpaces = stripSpaces(part)
@@ -207,6 +209,7 @@ local function findMatch(part, text) -- for part
     if found then local noTags = stripTag(found)
       local start, ending  = string.find(noTags, pattern)
       local outer = start == 1 and ending == #noTags
+      local wrapped, preface = contained(found, pattern, container)
       local exceptions = (container and not outer) or (exclusions and exclusions[found])
       if not exceptions then return handler, matchID end
     end
@@ -225,15 +228,13 @@ end
 local verbose = false
 
 function makeEntry(text, line) -- containers have elements (which may themselves be containers).
-  if not text then 
-    error("signfiles.makeEntry: Can't parse "..line) 
-  end
+  if not text then error("signfiles.makeEntry: Can't parse "..line) end
   local entries = {}; for element, handler, matchID in elements(text) do
     if verbose then print(element, matchID) end
     local LLS = handler(element, line); entries[#entries + 1] = LLS 
   end;  -- new table for each recursion
   local entry = table.concat(entries, " ")
-  return entry, entries -- as array for container concatenation 
+  return entry, entries -- `entries` as array for concatenation by container
 end
 
 -- **Produce LLS Lines and Write to File**

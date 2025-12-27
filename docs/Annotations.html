@@ -1189,9 +1189,9 @@ Visual Studio-like style based on original C# coloring by Jason Diamond <jason@d
 <p data-line="114" class="code-line" dir="auto">And here's how it's used:</p>
 <pre><code data-line="115" class="code-line language-Lua" dir="auto"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">move.left</span><span class="hljs-params">(count)</span></span> count = count <span class="hljs-keyword">or</span> <span class="hljs-number">1</span>; <span class="hljs-keyword">return</span> turn(turnLeft, count, <span class="hljs-string">"left"</span>, <span class="hljs-string">"move"</span>) <span class="hljs-keyword">end</span> <span class="hljs-comment">--:= move.moves:: move.left:</span>
 </code></pre>
-<p data-line="118" class="code-line" dir="auto">There are ten of these sharing the common definition and generating type information specific to each of the functions all the same and slightly different. (As a detail, function definitions are in a separate CodeMark name space for copy operations. The extra colon <code>move.moves::</code> above references the function name space.)</p>
+<p data-line="118" class="code-line" dir="auto">In one example application of CodeMark, there are ten of these sharing the common definition and generating type information specific to each of the functions all the same and slightly different. (As a detail, function definitions are in a separate CodeMark name space for copy operations. The extra colon <code>move.moves::</code> above references the function name space.)</p>
 <h2 data-line="120" class="code-line" dir="auto" id="type-annotations-tables-and-subtypes-of-tables" tabindex="-1">Type Annotations: Tables and Subtypes of Tables</h2>
-<p data-line="122" class="code-line" dir="auto">Tables are a critical building block for Lua scripts. A Lua table can be an <em>array</em>, a <em>dictionary</em>, or what LLS calls <em>table literals</em>. (The last are accessed using the dot notation as seen in the function names above.) Each has its own annotation. A table can also be typed as just a table with no other information as <code>{:}</code>, an array as <code>[:]</code>. pBut there's more.</p>
+<p data-line="122" class="code-line" dir="auto">Tables are a critical building block for Lua scripts. A Lua table can be an <em>array</em>, a <em>dictionary</em>, or what LLS calls <em>table literals</em>. (The last are accessed using the dot notation as seen in the function names above.) Each has its own annotation. A table can also be typed as just a table with no other information as <code>{:}</code>, an array as <code>[:]</code>. But there's more.</p>
 <p data-line="124" class="code-line" dir="auto">Tables as dictionaries and what LLS calls table literals are annotated as follows:</p>
 <p data-line="126" class="code-line" dir="auto"><code>--:&gt; features:</code> <em>Dictionary of string key feature, any value pairs</em> -&gt; <code>[feature: ":"]: any</code></p>
 <p data-line="128" class="code-line" dir="auto"><code>--:&gt; position:</code> <em>Computercraft co-ordinates (+x east, +y up, +z south)</em> -&gt; <code>{x: #:, y: #:, z: #:}</code></p>
@@ -1199,10 +1199,10 @@ Visual Studio-like style based on original C# coloring by Jason Diamond <jason@d
 <p data-line="132" class="code-line" dir="auto">Lua tables can also be used as (implicityly indexed) arrays. Here's an example of a TYPE annotation describing an array of strings:</p>
 <p data-line="134" class="code-line" dir="auto"><code>--:&gt; plan.path:</code> <em>array of space separated character sequence strings describing path</em> -&gt; <code>":"[]</code></p>
 <p data-line="136" class="code-line" dir="auto">Arrays with a fixed number of elements we'll call <em>tuples</em>. As for dictionary keys, CodeMark provides for labeling of tuple elements (stripped away for LLS):</p>
-<p data-line="138" class="code-line" dir="auto"><code>--:&gt; xyz:</code> <em>Minecraft coordinates: +x: east, +y: up, +z: south</em> -&gt; <code>:[x: #:, y: #:, z: #:]</code></p>
+<p data-line="138" class="code-line" dir="auto"><code>--:&gt; xyz:</code> <em>Minecraft coordinates: +x: east, +y: up, +z: south</em> -&gt; <code>[x: #:, y: #:, z: #:]</code></p>
 <p data-line="140" class="code-line" dir="auto">Specific kinds of tables can be thought of as being a new type which is a subtype of tables as in the examples above. Here's another example. The following function has one argument, <code>targets</code>, an array of strings. It returns a <code>detail</code> or <code>nil</code>. A <code>detail</code> is a table accessed by table literals: <code>name</code>, <code>count</code>, and <code>damage</code>. Each of these is typed and described.</p>
 <p data-line="142" class="code-line" dir="auto"><code>--:: core.findItems(targets: ":"[])</code> -&gt; <em>Selects found slot.</em> -&gt; <code>detail?</code><br>
-<code>--:&gt; detail:</code> <em>Defined by Computercraft</em> -&gt; <code>:[name: detail.name, count: detail.count, damage: detail.damage]</code><br>
+<code>--:&gt; detail:</code> <em>Defined by Computercraft</em> -&gt; <code>[name: detail.name, count: detail.count, damage: detail.damage]</code><br>
 <code>--:&gt; detail.name:</code> <em>Prepended by the mod name <code>"minecraft:"</code>.</em> -&gt; <code>":"</code><br>
 <code>--:&gt; detail.count:</code> <em>Available in inventory</em> -&gt; <code>#:</code>
 <code>--:&gt; detail.damage:</code> <em>Distinguishing value</em> -&gt; <code>#:</code></p>
@@ -1218,7 +1218,7 @@ Visual Studio-like style based on original C# coloring by Jason Diamond <jason@d
 <h2 data-line="166" class="code-line" dir="auto" id="making-marks" tabindex="-1">Making Marks</h2>
 <p data-line="168" class="code-line" dir="auto">CodeMark provides the programs to generate project documentation and LLS library files:</p>
 <ul data-line="170" class="code-line" dir="auto">
-<li data-line="170" class="code-line" dir="auto"><code>apiFiles</code> generates markdown summaries and the repository (used by ZBS and <code>signfiles</code>)</li>
+<li data-line="170" class="code-line" dir="auto"><code>apiFiles</code> generates markdown summaries and the project API repository (used by ZBS and <code>signfiles</code>)</li>
 <li data-line="171" class="code-line" dir="auto"><code>signFiles</code> generates LLS libraries, one for each source module, from the repository</li>
 <li data-line="172" class="code-line" dir="auto"><code>downFiles</code> generates HTML from summary files and the source modules themselves for each source module</li>
 </ul>
