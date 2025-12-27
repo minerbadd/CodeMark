@@ -14,52 +14,20 @@ local signfiles = dofile(CodeMark.."signfiles.lua")
 local testData = {
   
   {
-  ["returns"] = " `():` <-",
-  ["args"] = "completions: {:}",
+  ["returns"] = " `{:}|any` <-",
+  ["args"] = "source: {:}|any",
   ["type"] = "function",
-  ["name"] = "core.completer",
-  ["description"] = "Register command completions for shell",
+  ["name"] = "core.clone",
+  ["description"] = "Deep copy source table or return source if not table.",
 },
   
-   {
+  {
     ["returns"] = " `{part:():, close:():}` <-",
     ["args"] = "theTestSetTablePath:\":\", theTestSetName:\":\", theTestName:\":\"",
     ["type"] = "function",
     ["name"] = "check.open",
     ["description"] = "Return object(closure)",
   },
-  
-  {
-    ["returns"] = " `any` <-",
-    ["args"] = "op: ():, initial: any, table: {:}",
-    ["type"] = "function",
-    ["name"] = "core.reduce",
-    ["description"] = "Fold `table` _to produce_ `result` _by applying_ `op` _to_ `table",
-  },
-  
-  {
-  ["type"] = "value",
-  ["returns"] = " `[direction]: (text: \":\"?): ^:, \":\"?`",
-  ["name"] = "turtle.puts",
-  ["description"] = "Attempt placing block of the selected slot in direction.",
-},
-  
-  {
-  ["type"] = "value",
-  ["returns"] = " `[direction]: (): `^:`, `detail?`",
-  ["name"] = "turtle.inspects",
-  ["description"] = "If true, get detail block information in direction.",
-},
-  
-  {
-  ["returns"] = " `nil` <-",
-  ["args"] = "template: {name: \":\", offset: xyz}, base: \":\", label: \":\", top: #:",
-  ["type"] = "function",
-  ["name"] = "map.locations",
-  ["description"] = "Add points offset from base. Add labelled points using template names and offsets from named base point or top for y-axis.",
-},
-  
-  
   
   {
     ["type"] = "value",
@@ -67,7 +35,16 @@ local testData = {
     ["name"] = "xyzMap",
     ["description"] = "Table of vectors either an array or dictionary",
   },
-  
+
+
+  {
+    ["returns"] = " `():` <-",
+    ["args"] = "completions: {:}",
+    ["type"] = "function",
+    ["name"] = "core.completer",
+    ["description"] = "Register command completions for shell",
+  },
+
   {
     ["returns"] = " `{part:():, close:():}` <-",
     ["args"] = "theTestSetTablePath:\":\", theTestSetName:\":\", theTestName:\":\"",
@@ -75,7 +52,7 @@ local testData = {
     ["name"] = "check.open",
     ["description"] = "Return object(closure)",
   },
-  
+
   {
     ["returns"] = " `any` <-",
     ["args"] = "op: ():, initial: any, table: {:}",
@@ -83,7 +60,52 @@ local testData = {
     ["name"] = "core.reduce",
     ["description"] = "Fold `table` _to produce_ `result` _by applying_ `op` _to_ `table",
   },
-  
+
+  {
+    ["type"] = "value",
+    ["returns"] = " `[direction]: (text: \":\"?): ^:, \":\"?`",
+    ["name"] = "turtle.puts",
+    ["description"] = "Attempt placing block of the selected slot in direction.",
+  },
+
+  {
+    ["type"] = "value",
+    ["returns"] = " `[direction]: (): `^:`, `detail?`",
+    ["name"] = "turtle.inspects",
+    ["description"] = "If true, get detail block information in direction.",
+  },
+
+  {
+    ["returns"] = " `nil` <-",
+    ["args"] = "template: {name: \":\", offset: xyz}, base: \":\", label: \":\", top: #:",
+    ["type"] = "function",
+    ["name"] = "map.locations",
+    ["description"] = "Add points offset from base. Add labelled points using template names and offsets from named base point or top for y-axis.",
+  },
+
+  {
+    ["type"] = "value",
+    ["returns"] = " `xyz[] | [core.faces]: xyz`",
+    ["name"] = "xyzMap",
+    ["description"] = "Table of vectors either an array or dictionary",
+  },
+
+  {
+    ["returns"] = " `{part:():, close:():}` <-",
+    ["args"] = "theTestSetTablePath:\":\", theTestSetName:\":\", theTestName:\":\"",
+    ["type"] = "function",
+    ["name"] = "check.open",
+    ["description"] = "Return object(closure)",
+  },
+
+  {
+    ["returns"] = " `any` <-",
+    ["args"] = "op: ():, initial: any, table: {:}",
+    ["type"] = "function",
+    ["name"] = "core.reduce",
+    ["description"] = "Fold `table` _to produce_ `result` _by applying_ `op` _to_ `table",
+  },
+
   {
     ["returns"] = " `\":\"` <-",
     ["args"] = "thePlan: \":\", parameters: [nearPlace: \":\", farPlace: \":\", filling: \":\", target: \":\"?]",
@@ -91,7 +113,7 @@ local testData = {
     ["name"] = "_field.fillTill",
     ["description"] = "To `put``.",
   },
-    
+
   {
     ["returns"] = " `closing` <-",
     ["args"] = "table: {:}?, key: \":\"?  ",
@@ -99,8 +121,7 @@ local testData = {
     ["name"] = "core.state",
     ["description"] = "Returns closure over closure variable",
   },
-  
-  
+
   {
     ["returns"] = " `[distance: #:, name: \":\", label: \":\", cardinal: \":\", :xyzf:] <-",
     ["args"] = ":xyzf:?, :cardinals:",
@@ -132,13 +153,7 @@ local testData = {
     ["name"] = "core.clone",
     ["description"] = "Deep copy source table or return source if not table.",
   },
-  {
-    ["type"] = "value",
-    ["returns"] = " `xyz[] | [core.faces]: xyz`",
-    ["name"] = "xyzMap",
-    ["description"] = "Table of vectors either an array or dictionary",
-  },
-
+  
   {
     ["type"] = "value",
     ["returns"] = " {start: \":\"[], odd: \":\"[], even: \":\"[], last: \":\"[]}`",

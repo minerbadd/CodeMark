@@ -27,40 +27,35 @@ local function replace(patterns) -- generate function to replace patterns for gs
   end; return replacing
 end
 
-local function hider(text) return replace({ {",", ";"}, })(text, 1) end -- specialize replacer
+local function hider(text) return replace({ {",", ";"}, {"|", "!"} })(text, 1) end -- specialize replacer
 
 local containers = { "%b{}", "%b():", "%b[]", "%b()", }
 
-local function hide(text, index) -- commas to semicolons inside container 
+local function hide(text, index) -- hide separators inside container 
   if index > #containers then return text end 
   local hidden = string.gsub(text, containers[index], hider)
   return hide(hidden, index + 1)  -- rebind new string in recursion
 end
 
-local function restorer(text) return replace({ {";", ","}, })(text, 1) end -- and back to commas 
-
-local function partition(pattern) -- iterator factory
-  return function(text) -- make iterator for partitioning pattern in text
-    if not text then
-      error("no text")
-    end
-    local position, length = 1, string.len(text)
-    return function() -- iterator on text pattern handles single and last parts
-      if position > length then return end -- terminate iterator
-      local first, last = string.find(text, pattern, position)
-      local ending = (first and first < last) and last or length + 1
-      local current = position; position = ending + 1
-      return string.sub(text, current, ending - 1); -- partial string
-    end
-  end
-end
+local function restorer(text) return replace({ {";", ","}, {"!", "|"}  })(text, 1) end -- restore separators  
 
 local function restore(text) -- make table of restored parts (no partition of container)
-  local parts = {}; for part in partition("([^,]-),")(text) do -- break into parts of text ending in commas
-    parts[#parts + 1] = restorer(part) -- any semicolons and bangs back to commas for each part
+  local parts = {}; for part, separator in string.gmatch(text, "([^,|]*)([,|]?)") do
+    if part ~= "" then parts[#parts + 1] = restorer(part) end -- restore separators for each part
+    if separator == "|" then parts[#parts + 1] = separator end
   end; 
   return parts
 end
+
+local function assembler(parts, result, index, piped)
+  if index > #parts then return result end
+  local part = parts[index]; local pipe = part == "|"
+  local empty = result == ""
+  local separator = (pipe or piped or empty) and " " or ", "
+  return assembler(parts, result..separator..part, index + 1, pipe)
+end
+
+local function assemble(text) return assembler(text, "", 1, false) end
 
 local function stripTag(text) 
   local parts, stripped  = restore(text), {}
@@ -95,20 +90,17 @@ local function numberToken(text) return string.gsub(text, "#:", "number") end
 
 local function typeTwiceToken(text) return string.gsub(text, ":([_%a%d]-):", "%1: %1") end
 
+local function union(text) 
+  return text 
+end
+
 local function typeTaggedToken(text) return text end 
 
 local function typeToken(text) return text end 
 
 -- **Container Handlers: Make LLS entries of elements which may be or may be in containers.**
 
-local makeEntry, union, array, dictionary, groupContainer, funContainer, funToken, tupleContainer, literalsContainer -- mutual recursions
-
-function union(text, line)
-  local beforeText, afterText = string.match(text, "(.-)|(.*)")
-  local beforeEntry = makeEntry(beforeText, line) 
-  local afterEntry = makeEntry(afterText, line)
-  return beforeEntry.."|"..afterEntry
-end
+local makeEntry, array, dictionary, groupContainer, funContainer, funToken, tupleContainer, literalsContainer -- recursions
 
 function array(text, line) -- not a tuple, just the [] marker is enough
   local beforeArray = string.match(text, "(.-)%[%]")
@@ -136,13 +128,15 @@ end
 
 function groupContainer(text, line) 
   local insideGroup = string.match(text, "%((.-)%)")
-  local groupEntry = makeEntry(insideGroup, line)
+  local _, groupEntries = makeEntry(insideGroup, line)
+  local groupEntry = assemble(groupEntries)
   return tag(text, "%b()").."("..groupEntry..")" -- ..optional(text)
 end
 
 function tupleContainer(text, line) 
   local insideTable = string.match(text, "%[(.*)%]")
-  local tableEntry = makeEntry(insideTable, line)
+  local _, tableEntries = makeEntry(insideTable, line)
+  local tableEntry = assemble(tableEntries)
   local stripped = stripTag(tableEntry) -- need to strip off any tags in table entry
   return tag(text, "%b[]").."["..stripped.."]" -- ..optional(text) 
 end
@@ -159,16 +153,19 @@ function funContainer(text, line) -- leaky returns, use group to contain funCont
   local argsPart, returnsPart = string.match(text, "(%b()):(.-)$")
   local strippedReturns = stripOther(returnsPart, 1) 
   local insideArgs = string.match(argsPart, "%((.-)%)$")
-  local argsEntry = makeEntry(insideArgs, line)
-  local returnsEntry = makeEntry(strippedReturns, line)
+  local _, argsEntries = makeEntry(insideArgs, line)
+  local argsEntry = assemble(argsEntries)
+  local _, returnsEntries = makeEntry(strippedReturns, line)
+  local returnsEntry = assemble(returnsEntries)
   local funEntry = "fun("..argsEntry.."): "..returnsEntry
   return funEntry
 end
 
 function literalsContainer(text, line) 
   local insideLiterals = string.match(text, "{(.-)}%s*$") 
-  local literalsParts = makeEntry(insideLiterals, line)
-  local literalsEntry = "{"..literalsParts.."}" --..optional(text) 
+  local _, literalsParts = makeEntry(insideLiterals, line)
+  local literalsPart = assemble(literalsParts)
+  local literalsEntry = "{"..literalsPart.."}" --..optional(text) 
   return tag(text, "%b{}")..literalsEntry -- e.g. "{tag1: string, tag2: xyz}"
 end
 
@@ -192,6 +189,8 @@ local finders = { -- **Ordered most carefully; matchID string for debug**.. patt
   {":([%a%d%.]-):", typeTwiceToken, "typeTwiceToken"}, 
   {":%s-([%w%.]+)", typeTaggedToken, "typeTaggedToken"}, 
   {"([%w%.%s]*)", typeToken, "typeToken"},
+
+
 }
 -- **Match Elements Iterator to Make Entries**
 
@@ -228,8 +227,8 @@ function makeEntry(text, line) -- containers have elements (which may themselves
     if verbose then print(element, matchID) end
     local LLS = handler(element, line); entries[#entries + 1] = LLS 
   end;  -- new table for each recursion
-  local entry = table.concat(entries, ", ")
-  return entry, entries -- as string and table
+  local entry = table.concat(entries, " ")
+  return entry, entries -- as array for container concatenation 
 end
 
 -- **Produce LLS Lines and Write to File**
@@ -238,7 +237,8 @@ local function makeFunction(functionAPI)
   local line = functionAPI.name.."("..functionAPI.args.."): "..functionAPI.returns
   local args = stripOther(functionAPI.args, 1)
   local returns = stripOther(functionAPI.returns, 1)
-  local entry = makeEntry("("..args.."):"..returns, line)
+  local argsContained = "("..args.."):"
+  local entry = makeEntry(argsContained..returns, line)
   if not functionAPI.description then print("No description in "..line) end
   local description = "\n-- "..stripNewLine(functionAPI.description or "")
   local markLine, typeLine  = "-- "..line, "---@type "..entry
