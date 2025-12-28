@@ -1,4 +1,4 @@
--- **Generate Lua Language Server `signs` (signature) files from project api file**
+-- **Generate Lua Language Server `signs` (signature) files from project API repository file**
 
 local signfiles = {}
 
@@ -38,12 +38,11 @@ end
 
 local function restorer(text) return replace({ {";", ","}, {"!", "|"}  })(text, 1) end -- restore separators  
 
-local function restore(text) -- make table of restored parts (no partition of container)
+local function slice(text) -- make table of restored parts (no partition of container)
   local parts = {}; for part, separator in string.gmatch(text, "([^,|]*)([,|]?)") do
     if part ~= "" then parts[#parts + 1] = restorer(part) end -- restore separators for each part
     if separator == "|" then parts[#parts + 1] = separator end
-  end; 
-  return parts
+  end; return parts
 end
 
 local function assembler(parts, result, index, piped)
@@ -99,6 +98,13 @@ local function tag(text, pattern) -- find label aka tag before pattern and endin
   if not beforeText then return "" end
   return beforeText..": "
 end
+
+--[[ This fails because string.match finds the inner %b pattern
+local function tag(text, pattern)
+  local preface, body = string.match(text, "(.*):%s-("..pattern..")")
+  return preface and preface..": " or "", body
+end
+--]]
 
 function dictionary(text, line)
   local keyPart = string.match(text, "%[(.-)%]") -- may include tag
@@ -202,7 +208,7 @@ local function findMatch(part, text) -- for part
 end
 
 local function elements(text) -- iterator
-  local index, parts = 1, restore(hide(text, 1))
+  local index, parts = 1, slice(hide(text, 1))
   return function()  
     if index > #parts then return end-- terminate iterator
     local part = parts[index]; local handler, matchID = findMatch(part, text); index = index + 1 

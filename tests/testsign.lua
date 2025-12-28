@@ -14,6 +14,13 @@ local signfiles = dofile(CodeMark.."signfiles.lua")
 local testData = {
   
   {
+  ["type"] = "value",
+  ["returns"] = " `{:bores:, ores: {name: \":\", fixtures: \":\"[], path: \":\"[], work: plan.work} }`",
+  ["name"] = "crossplan",
+  ["description"] = "Bore and mine, minimal movement",
+},
+  
+  {
   ["returns"] = " `^:, \":\", #: &:` <-",
   ["args"] = "arguments: [op: \":\", placeName: \":\", borePlansFileOrLevels: \":\"|#:, shaftPlansFile: \":\"]",
   ["type"] = "function",
