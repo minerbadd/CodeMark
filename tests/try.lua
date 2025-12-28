@@ -1,4 +1,19 @@
+local function tag(text, pattern)
+  local preface, body = string.match(text, pattern)-- string.match(text, "(.*):%s-("..pattern..")")
+  return preface, body
+end
 
+local text1 = " {:bores:, ores: {name: \":\", fixtures: \":\"[], path: \":\"[], work: plan.work} }"
+local result1 = tag(text1, "(.-):?%s-(%b{})")
+print(result1)
+
+--[[
+local text2 = " abc [def [ghi jkl] mno] pqr "
+local result2 = string.match(text2, "(%b[])")
+print(result2)
+--]]
+
+--[[
 local part = " op: string,  placeName: string,  borePlansFileOrLevels: string | number,  shaftPlansFile: string"
 local function tupleStrip(part)
   local stripped = string.gsub(part, "[_%w]-:([%w|]*)", "%1")
@@ -6,6 +21,7 @@ local function tupleStrip(part)
 end
 
 print(tupleStrip(part))
+--]]
 --[[
 local function assembler(parts, result, index, piped)
   if index > #parts then return result end

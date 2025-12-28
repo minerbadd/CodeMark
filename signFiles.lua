@@ -95,16 +95,8 @@ local function tag(text, pattern) -- find label aka tag before pattern and endin
   local patternStart = assert(string.find(text, pattern), "missing pattern "..pattern.." in "..text)
   local beforePart = string.sub(text, 1, patternStart - 1) -- just the part before the pattern
   local beforeText = string.match(beforePart, "(.-):")
-  if not beforeText then return "" end
-  return beforeText..": "
+  return beforeText and beforeText..": " or ""
 end
-
---[[ This fails because string.match finds the inner %b pattern
-local function tag(text, pattern)
-  local preface, body = string.match(text, "(.*):%s-("..pattern..")")
-  return preface and preface..": " or "", body
-end
---]]
 
 function dictionary(text, line)
   local keyPart = string.match(text, "%[(.-)%]") -- may include tag
