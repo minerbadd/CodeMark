@@ -57,12 +57,13 @@ local finds = {
   {"```md", function (out, _) if inScript then out[#out + 1] = endCode end; out[#out + 1] = mdCode; inScript = true end}, 
   {"<pre>", function (out, line) inScript = true; out[#out + 1] = line end},
   {"</pre>", function (out, line) inScript = false; out[#out + 1] = line end},
-  {"```",  function (out, _, _) inScript = false; out[#out + 1] = endCode end},
-  {"%-%-%[%[", function() end}, {"%-%-%]%]", function() end}, -- eliminate comment block delimiters
+  {"```",  function (out, _) inScript = false; out[#out + 1] = endCode end},
+  {"%-%-%[%[", function(_, _) end}, {"%-%-%]%]", function() end}, -- eliminate comment block delimiters
 }
 
 local function checkLine(line, out) -- special line?
   for _, find in ipairs(finds) do local check, op = table.unpack(find)
+---@diagnostic disable-next-line: param-type-mismatch
     if string.find(line, check) then op(out, line); return end 
   end; out[#out + 1] = scanLine(line) -- no special lines
 end
