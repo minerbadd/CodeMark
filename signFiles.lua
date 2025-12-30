@@ -156,7 +156,9 @@ function literalsContainer(text, line)
   return tag(text, "%b{}")..literalsEntry -- e.g. "{tag1: string, tag2: xyz}"
 end
 
-local finders = { -- **Ordered most carefully; matchID string for debug**.. pattern, handler, exclusions, container
+local finders = { -- **Ordered most carefully; matchID string for debug**.. pattern, handler, matchID, exclusions, container
+  --:> `finder:` _Dispatch_ -> `[pattern: ":", handler: (text: ":", line: ":"): ":", matchID: ":", exclusions: [":"]: ^:, container: ^:]`
+  ---@alias finder [string, function, string, {[string]: boolean}, boolean]
   {"(%b():).-$", funContainer, "funContainer", {["():"] = true}, true },  -- true to indicate container
   {"(%b{})", literalsContainer, "literalsContainer", {["{:}"] = true}, true}, 
   {"(%b[]:).-$", dictionary, "dictionary"}, 
@@ -178,19 +180,21 @@ local finders = { -- **Ordered most carefully; matchID string for debug**.. patt
   {"([%w%.%s]*)", typeToken, "typeToken"},
 }
 -- **Match Elements Iterator to Make Entries**
-
-local function contained(text, pattern, container)
-  if not container then return true end
+local function contained(text, pattern, container)  if not container then return true end
   local preface = string.match(text, "(.-)"..pattern)
   local contained = preface == ""
   return contained, preface
+end
+---@type fun(finder: finder): string, function, string, { [string]: boolean }, boolean
+local function unpackFinder(finder) -- elaborate workaround for LLS with table.unpack
+ local pattern, handler, matchID, exclusions, container = table.unpack(finder)
+ return pattern, handler, matchID, exclusions, container
 end
 
 local function findMatch(part, text) -- for part
   local noSpaces = stripSpaces(part)
   for _, finder in ipairs(finders) do
-    local pattern, handler, matchID, exclusions, container = table.unpack(finder)
----@diagnostic disable-next-line: param-type-mismatch
+    local pattern, handler, matchID, exclusions, container = unpackFinder(finder)
     local found = string.match(noSpaces, pattern)
     if found then 
       local wrapped = contained(found, pattern, container)
