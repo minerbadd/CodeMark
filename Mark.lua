@@ -36,6 +36,7 @@ local function marker(apiDirectory, apiFile, sourceDirectories, docsDirectories,
 end
 
 local function helper(helps, help) -- output concatenated help file from helps directory files
+---@diagnostic disable-next-line: undefined-global
   local helpers = {}; for helpFile in lfs.dir(helps) do  
     -- `helps` must be aligned with `sign` fields of `HELP` file marks 
     local extension = string.match(helpFile, "%.(%a*)$")

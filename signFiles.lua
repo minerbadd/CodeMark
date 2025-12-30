@@ -190,6 +190,7 @@ local function findMatch(part, text) -- for part
   local noSpaces = stripSpaces(part)
   for _, finder in ipairs(finders) do
     local pattern, handler, matchID, exclusions, container = table.unpack(finder)
+---@diagnostic disable-next-line: param-type-mismatch
     local found = string.match(noSpaces, pattern)
     if found then 
       local wrapped = contained(found, pattern, container)

@@ -53,11 +53,11 @@ local luaCode = '<pre><code class="language-lua">'
 local endCode = "</code></pre>"
 
 local finds = {
-  {"```[Ll]ua", function (out) if inScript then out[#out + 1] = endCode end; out[#out + 1] = luaCode; inScript = true end}, 
-  {"```md", function (out) if inScript then out[#out + 1] = endCode end; out[#out + 1] = mdCode; inScript = true end}, 
+  {"```[Ll]ua", function (out, _) if inScript then out[#out + 1] = endCode end; out[#out + 1] = luaCode; inScript = true end}, 
+  {"```md", function (out, _) if inScript then out[#out + 1] = endCode end; out[#out + 1] = mdCode; inScript = true end}, 
   {"<pre>", function (out, line) inScript = true; out[#out + 1] = line end},
   {"</pre>", function (out, line) inScript = false; out[#out + 1] = line end},
-  {"```",  function (out) inScript = false; out[#out + 1] = endCode end},
+  {"```",  function (out, _, _) inScript = false; out[#out + 1] = endCode end},
   {"%-%-%[%[", function() end}, {"%-%-%]%]", function() end}, -- eliminate comment block delimiters
 }
 
