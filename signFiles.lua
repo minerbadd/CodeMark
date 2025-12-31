@@ -88,7 +88,7 @@ local makeEntry, array, dictionary, groupContainer, funContainer, funToken, tupl
 function array(text, line) -- not a tuple, just the [] marker is enough
   local beforeArray = string.match(text, "(.-)%[%]")
   local arrayEntry = makeEntry(beforeArray, line) 
-  return arrayEntry.."[]" --..optional(text) 
+  return arrayEntry.."[]" 
 end
 
 local function tag(text, pattern) -- find label aka tag before pattern and ending in ":"
@@ -112,7 +112,7 @@ function groupContainer(text, line)
   local insideGroup = string.match(text, "%((.-)%)")
   local _, groupEntries = makeEntry(insideGroup, line)
   local groupEntry = assemble(groupEntries)
-  return tag(text, "%b()").."("..groupEntry..")" -- ..optional(text)
+  return tag(text, "%b()").."("..groupEntry..")" 
 end
 
 local function tupleStrip(part)
@@ -125,7 +125,7 @@ function tupleContainer(text, line)
   local _, tableEntries = makeEntry(insideTable, line)
   local tableEntry = assemble(tableEntries)
   local stripped = tupleStrip(tableEntry) -- need to strip off any tags in table entry
-  return tag(text, "%b[]").."["..stripped.."]" -- ..optional(text) 
+  return tag(text, "%b[]").."["..stripped.."]" 
 end
 
 function funToken(text, line)
@@ -136,7 +136,7 @@ function funToken(text, line)
   return tokenEntry
 end
 
-function funContainer(text, line) -- leaky returns, use group to contain funContainer
+function funContainer(text, line) 
   local argsPart, returnsPart = string.match(text, "(%b()):(.-)$")
   local strippedReturns = stripOther(returnsPart, 1) 
   local insideArgs = string.match(argsPart, "%((.-)%)$")
@@ -152,7 +152,7 @@ function literalsContainer(text, line)
   local insideLiterals = string.match(text, "{(.-)}%s*$") 
   local _, literalsParts = makeEntry(insideLiterals, line)
   local literalsPart = assemble(literalsParts)
-  local literalsEntry = "{"..literalsPart.."}" --..optional(text) 
+  local literalsEntry = "{"..literalsPart.."}" 
   return tag(text, "%b{}")..literalsEntry -- e.g. "{tag1: string, tag2: xyz}"
 end
 
@@ -169,7 +169,6 @@ local finders = { -- **Ordered most carefully; matchID string for debug**.. patt
 
   {"|", union, "union"},
 
-  {"(.+%[%])", array, "array"}, -- [] can't stand alone, use [:]
   {"(%[:%])", array, "arrayToken"},  {"({:})", tableToken,  "tableToken"}, 
   {"(#:)", numberToken, "numberToken"},   {'(":")', stringToken, "stringToken"}, 
   {"(%^:)", booleanToken, "booleanToken"}, {"(@:)", userdataToken, "userdataToken"}, 
@@ -186,10 +185,7 @@ local function contained(text, pattern, container)  if not container then return
   return contained, preface
 end
 ---@type fun(finder: finder): string, function, string, { [string]: boolean }, boolean
-local function unpackFinder(finder) -- elaborate workaround for LLS with table.unpack
- local pattern, handler, matchID, exclusions, container = table.unpack(finder)
- return pattern, handler, matchID, exclusions, container
-end
+local unpackFinder = table.unpack
 
 local function findMatch(part, text) -- for part
   local noSpaces = stripSpaces(part)
@@ -259,7 +255,7 @@ local function writeLines (outLines, outFile, outName, verbose)
   if verbose then print(#outLines.." lines written in "..outName) end
 end
 
--- **Process api** file
+-- **Process api file**
 
 local function commaSplit(text)
   local items = {}; items[#items + 1] = string.match(text, "([^,]*),?"); -- first
