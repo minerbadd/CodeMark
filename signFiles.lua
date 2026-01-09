@@ -28,7 +28,7 @@ end
 
 local function hider(text) return replace({ {",", ";"}, {"|", "!"} })(text, 1) end -- specialize replacer
 
-local containers = { "%b{}", "%b():", "%b[]", "%b()", }
+local containers = { "%b{}", "%b[]:.*$", "%b():[^,].*$", "%b[]", "%b()", }
 
 local function hide(text, index) -- hide separators inside container 
   if index > #containers then return text end 
@@ -47,8 +47,8 @@ end
 
 local function assembler(parts, result, index, piped)
   if index > #parts then return result end
-  local part = parts[index]; local pipe = part == "|"
-  local empty = result == ""
+  local part = parts[index]; local pipe = (part == "|")
+  local empty = (result == "")
   local separator = (pipe or piped or empty) and " " or ", "
   return assembler(parts, result..separator..part, index + 1, pipe)
 end
@@ -131,13 +131,15 @@ end
 function funToken(text, line)
   local returnsToken = string.match(text,  "%(%):(.-)$")
   local returnsEmpty = stripSpaces(returnsToken) == "" or returnsToken == "?"
-  local returnsEntry = returnsEmpty and "function" or "fun():"..makeEntry(returnsToken, line)
+  if returnsEmpty then return tag(text, "%(%):").."function" end
+  local _, returnsEntries = makeEntry(returnsToken, line)
+  local returnsEntry = "fun():"..assemble(returnsEntries)
   local tokenEntry = tag(text, "%(%):")..returnsEntry
   return tokenEntry
 end
 
 function funContainer(text, line) 
-  local argsPart, returnsPart = string.match(text, "(%b()):(.-)$")
+  local argsPart, returnsPart = string.match(text, "(%b()):(.*)$")
   local strippedReturns = stripOther(returnsPart, 1) 
   local insideArgs = string.match(argsPart, "%((.-)%)$")
   local _, argsEntries = makeEntry(insideArgs, line)
@@ -180,9 +182,9 @@ local finders = { -- **Ordered most carefully; matchID string for debug**.. patt
 }
 -- **Match Elements Iterator to Make Entries**
 local function contained(text, pattern, container)  if not container then return true end
-  local preface = string.match(text, "(.-)"..pattern)
-  local contained = preface == ""
-  return contained, preface
+local preface = string.match(text, "(.-)"..pattern)
+local contained = preface == ""
+return contained, preface
 end
 ---@type fun(finder: finder): string, function, string, { [string]: boolean }, boolean
 local unpackFinder = table.unpack

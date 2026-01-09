@@ -1,4 +1,4 @@
--- **Generate summary and update ZBS completion and API information for edited file.**
+-- **Generate summary and update ZBS completion and API information for Lua files.**
 -- **Note: table returned by loading this file adds an entry for CLI batch operation (and debug) not in ZBS package spec.** 
 
 -- _Executing the_ `..codemark.lua` _file returns a table with an_ `api` _keyed entry whose value overrides the project name_.
@@ -188,7 +188,7 @@ end
 
 local function doLib(this) -- make `lib` entries for module
   local moduleName, text = string.match(this.sign, "(.-)%s"), this.text
-  local moduleLibs = string.match(this.text, "%->(.*)$") -- returns
+  local moduleLibs = string.match(this.text, "%->(.-)$") -- returns
   local description = "\n"..stripUnder(text); Descriptions = {description} --begin accumuluation
   local entry = {type = "lib", name = moduleName, description = description, returns = moduleLibs, kind = "module", childs = {} }
   ZBSapi[moduleName] = entry; CurrentEntry = entry; Library = moduleName
@@ -253,7 +253,7 @@ local spacers = {api = "", list = "", help = "", head = "\n\n", type = "\n\n", f
 
 local function stripLink(text) return string.gsub(text, '%[(.-)%]%(.-%)', '%1') end
 
-local function finishClump(helpLines) -- no MORE to process
+local function  finishClump(helpLines) -- no MORE to process
 ---@diagnostic disable-next-line: inject-field
   CurrentEntry.description = table.concat(Descriptions, " "); 
 ---@diagnostic disable-next-line: need-check-nil
@@ -300,6 +300,14 @@ local function serialize(o, file) file:write("return "); serializes(o, file) end
 local function output(outLines, file) for _, line in ipairs(outLines) do assert(file:write(line)) end end
 
 local function getZBSapi(ZBSapiFile) local loaded = loadfile(ZBSapiFile); return loaded and loaded() or {}; end
+
+local function testFile(inputPath, apiPath)
+  ZBSapi = {}
+  local marked = markLines(inputPath)
+  local outLines, helpLines = doLines(marked); -- **do the work**
+  local handleZ = assert(io.open(apiPath, "w")); serialize(ZBSapi, handleZ); assert(io.close(handleZ))
+  return ZBSapi, outLines, helpLines
+end
 
 local function codemarkCLI(input, ZBSroot, apiPath) -- ZBSroot if called from ZBS package, apiPath if called from CLI
   ZBSapi, HelpPath, Descriptions, CurrentEntry, Checkings = {}, nil, {}, nil, {}-- initialize
@@ -357,6 +365,7 @@ return {
   end,
 
   cli = codemarkCLI, -- **Interface for (bulk) Command Line Interface (and to assist debug)**
-  line = testLine
+  line = testLine,
+  file = testFile,
 }
 

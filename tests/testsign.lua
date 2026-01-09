@@ -13,29 +13,47 @@ local signfiles = dofile(CodeMark.."signfiles.lua")
 
 local testData = {
   
-  {
-  ["type"] = "value",
-  ["returns"] = " `{:bores:, ores: {name: \":\", fixtures: \":\"[], path: \":\"[], work: plan.work} }`",
-  ["name"] = "crossplan",
-  ["description"] = "Bore and mine, minimal movement",
-},
+   {
+    ["type"] = "value",
+    ["returns"] = " `[direction]: (): `^:`, `detail?`",
+    ["name"] = "turtle.inspects",
+    ["description"] = "If true, get detail block information in direction.",
+  },
+
   
   {
-  ["returns"] = " `^:, \":\", #: &:` <-",
-  ["args"] = "arguments: [op: \":\", placeName: \":\", borePlansFileOrLevels: \":\"|#:, shaftPlansFile: \":\"]",
-  ["type"] = "function",
-  ["name"] = "mine.op",
-  ["description"] = "Dig. Dig shaft; go to post at level; bore, mark, and torch; get ores. Markers hold saved plans.",
-},
+    ["returns"] = " `any` <-",
+    ["args"] = "op: ():, initial: any, table: {:}",
+    ["type"] = "function",
+    ["name"] = "core.reduce",
+    ["description"] = "Fold `table` _to produce_ `result` _by applying_ `op` _to_ `table",
+  },
   
+ 
+
   {
-  ["returns"] = " `{:}|any` <-",
-  ["args"] = "source: {:}|any",
-  ["type"] = "function",
-  ["name"] = "core.clone",
-  ["description"] = "Deep copy source table or return source if not table.",
-},
-  
+    ["returns"] = " `^:, \":\", #: &:` <-",
+    ["args"] = "arguments: [op: \":\", placeName: \":\", borePlansFileOrLevels: \":\"|#:, shaftPlansFile: \":\"]",
+    ["type"] = "function",
+    ["name"] = "mine.op",
+    ["description"] = "Dig. Dig shaft; go to post at level; bore, mark, and torch; get ores. Markers hold saved plans.",
+  },
+
+  {
+    ["type"] = "value",
+    ["returns"] = " `{:bores:, ores: {name: \":\", fixtures: \":\"[], path: \":\"[], work: plan.work} }`",
+    ["name"] = "crossplan",
+    ["description"] = "Bore and mine, minimal movement",
+  },
+
+  {
+    ["returns"] = " `{:}|any` <-",
+    ["args"] = "source: {:}|any",
+    ["type"] = "function",
+    ["name"] = "core.clone",
+    ["description"] = "Deep copy source table or return source if not table.",
+  },
+
   {
     ["returns"] = " `{part:():, close:():}` <-",
     ["args"] = "theTestSetTablePath:\":\", theTestSetName:\":\", theTestName:\":\"",
@@ -43,7 +61,7 @@ local testData = {
     ["name"] = "check.open",
     ["description"] = "Return object(closure)",
   },
-  
+
   {
     ["type"] = "value",
     ["returns"] = " `xyz[] | [core.faces]: xyz`",
@@ -69,25 +87,10 @@ local testData = {
   },
 
   {
-    ["returns"] = " `any` <-",
-    ["args"] = "op: ():, initial: any, table: {:}",
-    ["type"] = "function",
-    ["name"] = "core.reduce",
-    ["description"] = "Fold `table` _to produce_ `result` _by applying_ `op` _to_ `table",
-  },
-
-  {
     ["type"] = "value",
     ["returns"] = " `[direction]: (text: \":\"?): ^:, \":\"?`",
     ["name"] = "turtle.puts",
     ["description"] = "Attempt placing block of the selected slot in direction.",
-  },
-
-  {
-    ["type"] = "value",
-    ["returns"] = " `[direction]: (): `^:`, `detail?`",
-    ["name"] = "turtle.inspects",
-    ["description"] = "If true, get detail block information in direction.",
   },
 
   {
@@ -168,7 +171,7 @@ local testData = {
     ["name"] = "core.clone",
     ["description"] = "Deep copy source table or return source if not table.",
   },
-  
+
   {
     ["type"] = "value",
     ["returns"] = " {start: \":\"[], odd: \":\"[], even: \":\"[], last: \":\"[]}`",

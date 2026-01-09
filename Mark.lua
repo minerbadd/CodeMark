@@ -54,4 +54,4 @@ local function helper(helps, help) -- output concatenated help file from helps d
   print("Help files from "..helps.." in "..help)
 end
 
-return {marker = marker, helper = helper}
+return {marker = marker, helper = helper, }
