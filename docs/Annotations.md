@@ -30,7 +30,7 @@ Here are some examples of the three kinds for file marks:
 |  LIST  |`--:~`|    `":"`       | <- | **Chart 40 Block Farm**| -> |`muse/docs/charts/farm40.md`  |
 |  HELP  |`--:?`|   `rom/help/amuse.txt`     | <- | **Prepare a Turtle**     | -> |`muse/docs/amuse.md` |
 
-Each of these three kinds of CodeMark annotated files supply _Sign_,  _Text_, and _Out_ fields in their file marks. The _Out_ field specifies where to put a Markdown summary of the interfaces exposed by the file. It indicates the project name that the file is part of as the first part of that specification. Summary files and LLS libraries will be in the directory in the project file tree found with that project name. The _Text_ field is just a short description of what the file is for. The _Sign_ field shows CodeMark type annotation for the return values of the execution of API and LIST files. 
+Each of these three kinds of CodeMark annotated files supply _Sign_,  _Text_, and _Out_ fields in their file marks. They're all provide information about how to produce documentation for the file. The _Out_ field specifies where to put a Markdown summary of the interfaces exposed by the file. It indicates the project name that the file is part of as the first part of that specification. Summary files and LLS libraries will be in the directory in the project file tree found with that project name. The _Text_ field is just a short description of what the file is for. The _Sign_ field shows CodeMark type annotation for the return values of the execution of API and LIST files. 
 
 (As an aside, the API example above indicates that the `map` module's return value is a table indexed by `map` which is in turn a dictionary of functions. All to be described later.)
 
@@ -38,7 +38,9 @@ Each of these three kinds of CodeMark annotated files supply _Sign_,  _Text_, an
 
 Reference marks provide the bulk of CodeMark annotations in a file. They are included in the summary file output for the CodeMark annotated file and may either generate a help file or make changes to the project repository, a file where project wide information is kept .
 
-**LIB** marks for a module create project repository entries with descriptions of the module's libraries. They provide information needed to produce a LLS signature file for that library. There is one such mark for a module. Library names are unique within a project: no module may include a library name included in any other module in the project.
+**LIB** marks for a module create project repository entries with descriptions of the module's libraries.  They provide information needed to produce a LLS signature file for that library. There is one such mark for a module. The _Sign_ field names the module. The _Out_ field identifies the libraries supplied by the module. Library names are unique within a project: no module may include a library name included in any other module in the project.
+
+Some project wide data structures are associated with no particular library. They are included in the project repository with the module that defines them. The module name is included in the _Out_ field.
 
 **FACE** marks document the library, name, and arguments of a library function, that is, its (inter)face, as its _Sign_. (signature) They document what the element returns as _Out_ as well as a description of the element as _Text_. The library and name of the element are separated by a dot (as shown in the example below). The _Sign_ and _Out_ fields are used as a key for code completion and type check information in the project repository. The _Text_ field is also retrieved for inclusion as part of ZBS and VSC tool tips. As a special case, if the library name for the (internal) function begins with an underscore, the mark generates an entry in the project repository for type checking but is not included in the summary file output. The _Sign_ and _Out_ fields use CodeMark type annotation syntax described later.
 
