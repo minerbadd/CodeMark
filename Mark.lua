@@ -24,7 +24,7 @@ local function marker(apiDirectory, apiFile, sourceDirectories, docsDirectories,
   signFiles.cli(apiDirectory, apiFile, verbose) -- make sign files for Lua Language Server from project repository apifile 
   print("LLS signature files in "..apiDirectory)
 
-  for _, directory in ipairs(docsDirectories) do -- make html from 
+  for _, directory in ipairs(docsDirectories) do -- make html from docs
     downFiles(directory, directory, "md", verbose)
     print("HTML files from markdown files in "..directory)
   end

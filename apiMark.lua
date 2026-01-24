@@ -1,5 +1,5 @@
 -- **Generate summary and update ZBS completion and API information for Lua files.**
--- **Note: table returned by loading this file adds an entry for CLI batch operation (and debug) not in ZBS package spec.** 
+-- **Note: table returned by loading this file adds entries for CLI batch operation (and debug) not in ZBS package spec.** 
 
 -- _Executing the_ `..codemark.lua` _file returns a table with an_ `api` _keyed entry whose value overrides the project name_.
 -- _Example:_ `return {api = 'test', }`. _Edit the ZBS preference file to set the `api` to the project name, e.g.,_ `api = {'test'}`
