@@ -116,6 +116,7 @@ local footers = {lua = luaFooter, md = markdownFooter}
 function downMark.cli (inPath, outPath, extension, verbose)
   local outHTML = makeOut(outPath) -- `outName` needs a realized directory and a proper (HTML) extension
   local fileIn, fileOut = assert(io.open(inPath, "r")), assert(io.open(outHTML, "w"))
+---@diagnostic disable-next-line: param-type-mismatch
   local outLines, inLines = {}, fileIn:read("*all"); fileIn:close()
   for line in headers[extension]:gmatch("([^\n]*)\n?") do outLines[#outLines + 1] = line end
   inScript = extension == "md"; putHTML(inLines, outLines)-- put HTML lines in table

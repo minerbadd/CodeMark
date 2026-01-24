@@ -43,6 +43,7 @@ local function helper(helps, help) -- output concatenated help file from helps d
     if extension == "txt" then
       local helpPath = helps..helpFile; local helpFileHandle = io.open(helpPath, "r")
       if helpFileHandle then 
+---@diagnostic disable-next-line: param-type-mismatch
         local helpLines = helpFileHandle:read("*all"); helpFileHandle:close()
         local helpLine = string.gsub(helpLines, "\n \n", ": ")
         helpers[#helpers + 1] = string.gsub(helpLine, "\n", "")
