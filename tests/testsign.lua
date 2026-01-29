@@ -12,15 +12,23 @@ local CodeMark =  table.concat(files, "/", 1, #files - 1).."/"
 local signfiles = dofile(CodeMark.."signfiles.lua")
 
 local testData = {
-  
-   {
+
+  {
+    ["returns"] = " `name: \":\"`, `label \":\"`, `:situations:`, `:features:?` <-",
+    ["args"] = ":place:",
+    ["type"] = "function",
+    ["name"] = "place.placing",
+    ["description"] = "Unpack place",
+  },
+
+  {
     ["type"] = "value",
     ["returns"] = " `[direction]: (): `^:`, `detail?`",
     ["name"] = "turtle.inspects",
     ["description"] = "If true, get detail block information in direction.",
   },
 
-  
+
   {
     ["returns"] = " `any` <-",
     ["args"] = "op: ():, initial: any, table: {:}",
@@ -28,8 +36,8 @@ local testData = {
     ["name"] = "core.reduce",
     ["description"] = "Fold `table` _to produce_ `result` _by applying_ `op` _to_ `table",
   },
-  
- 
+
+
 
   {
     ["returns"] = " `^:, \":\", #: &:` <-",
