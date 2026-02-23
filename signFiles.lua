@@ -131,7 +131,7 @@ end
 function funToken(text, line)
   local returnsToken = string.match(text,  "%(%):(.-)$")
   local returnsEmpty = stripSpaces(returnsToken) == "" or returnsToken == "?"
-  if returnsEmpty then return tag(text, "%(%):").."function" end
+  if returnsEmpty then return tag(text, "%(%):").."function"..returnsToken end
   local _, returnsEntries = makeEntry(returnsToken, line)
   local returnsEntry = "fun():"..assemble(returnsEntries)
   local tokenEntry = tag(text, "%(%):")..returnsEntry

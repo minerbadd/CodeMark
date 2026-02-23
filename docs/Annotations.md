@@ -89,11 +89,11 @@ The implementation and its documentation are kept together and just referenced w
 
 ## <a id="type"> </a> Type Annotations: Introduction 
 
-CodeMark annotations are more concise than those of LLS and more descriptive. But they do map to LLS annotations. The simple types such as numbers, `#:`, strings, `":"`,  and booleans, `^:` map directly.  Lua also allows for "userdata" types, `@:`, perhaps written in C, available to the Lua runtime. The boolean values `true` and `false` as well as `nil` are represented as is. It's sometimes useful to be able to represent something that may be any type, `any`.  Further, it is common in Lua code to ignore some return values as well as some elements of a table. This is indicated by the dummy type, `_:` treated as `any`. 
+CodeMark annotations can be more concise than those of LLS and more descriptive. But they do map to LLS annotations. The simple types such as numbers, `#:`, strings, `":"`,  and booleans, `^:` abbreviatios map directly.  Lua also allows for "userdata" types, abbreviated as `@:`, perhaps written in C, available to the Lua runtime. The boolean values `true` and `false` as well as `nil` are represented as is. It's sometimes useful to be able to represent something that may be any type, `any`.  Further, it is common in Lua code to ignore some return values as well as some elements of a table. This is indicated by the dummy type, `_:` treated as `any`. 
 
 Annotations may be grouped with parentheses, `()`. They may be combined as a union of types as `|`. They may be marked with a `?` suffix to indicate that a value may be `nil`.
 
-Functions, are annotated as `():`. The annotation allows for (but does not require) named and typed parameters as well as typed (and optionally named) return values. Here's a simple example:
+Functions, are abbreviated as `():`. The annotation allows for (but does not require) named and typed parameters as well as typed (and optionally named) return values. Here's a simple example:
 
 `--:: move.track(enable: ^:)` -> _Set tracking condition_ -> `enable: ^:`
 
@@ -124,7 +124,7 @@ In one example application of CodeMark, there are ten of these sharing the commo
 
 ## Type Annotations: Tables and Subtypes of Tables
 
-Tables are a critical building block for Lua scripts. A Lua table can be an _array_, a _dictionary_, or what LLS calls _table literals_. (The last are accessed using the dot notation as seen in the function names above.) Each has its own annotation. A table can also be typed as just a table with no other information as `{:}`, an array as `[:]`. But there's more. 
+Tables are a critical building block for Lua scripts. A Lua table can be an _array_, a _dictionary_, or what LLS calls _table literals_. (The last are accessed using the dot notation as seen in the function names above.) Each has its own annotation. A table can also be typed as just a `table` with no other information abbreviated as `{:}`, an array as `[:]`. But there's more. 
 
 Tables as dictionaries and what LLS calls table literals are annotated as follows:
 
@@ -134,7 +134,7 @@ Tables as dictionaries and what LLS calls table literals are annotated as follow
 
 CodeMark provides for the labeling of dictionary keys. These are stripped away for LLS.
 
-Lua tables can also be used as (implicityly indexed) arrays. Here's an example of a TYPE annotation describing an array of strings:
+Lua tables can also be used as (implicitly indexed) arrays. Here's an example of a TYPE annotation describing an array of strings:
 
 `--:> plan.path:` _array of space separated character sequence strings describing path_ -> `":"[]`
 

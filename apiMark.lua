@@ -209,8 +209,8 @@ end
 local function doFace(this) -- _Add a face as a child of a library, begin accumulation of face Descriptions_ 
   local description = "\n"..stripUnder(this.text); Descriptions = {description} --begin accumuluation
   local args, returns, name = parseSign(this.sign), (this.out or "").." <-\n", makeName(this.sign)
-  local key, library = assert(makeChildKey(this.sign)); local ZBSlibrary = ZBSapi[library]; 
-  if not ZBSlibrary then error("codemark.doFace: unknown library "..library.." for "..this.line) end
+  local key, library = assert(makeChildKey(this.sign)); local ZBSlibrary = ZBSapi[library or Library]; 
+  if not ZBSlibrary then error("codemark.doFace: unknown library "..(library or "?").." for "..this.line) end
   local childs = ZBSlibrary.childs; local noOutline = string.find(name, "^_")
   local entry = {type = "function", name = name, args = args, description = description, returns = returns}
   childs[key] = entry; CurrentEntry = entry; ZBSapi["_"..name..":_"] = this -- for copy retrieval

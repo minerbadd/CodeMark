@@ -14,6 +14,14 @@ local signfiles = dofile(CodeMark.."signfiles.lua")
 local testData = {
 
   {
+    ["returns"] = " `any` `&: &!` <-",
+    ["args"] = "server: \":\", command: \":\", arguments: any[], callback: ():?",
+    ["type"] = "function",
+    ["name"] = "remote.call",
+    ["description"] = "RPC: Form serialized request table from command string and arguments. Get server ID from server name. Send request to server, wait for result, return call (default `remote.returns`) callback function to result.",
+  },
+
+  {
     ["returns"] = " `name: \":\"`, `label \":\"`, `:situations:`, `:features:?` <-",
     ["args"] = ":place:",
     ["type"] = "function",
